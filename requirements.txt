@@ -1,0 +1,7 @@
+langchain
+langchain_unstructured
+langchain_openai
+langchain_community
+unstructured
+faiss-cpu
+xlsxwriter
