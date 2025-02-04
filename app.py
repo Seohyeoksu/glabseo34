@@ -371,6 +371,13 @@ JSON 예시:
              5: f"""
 (5단계) 교수학습 및 평가
 이전 단계(성취기준): {standards}
+"teaching_methods_text": 문자열 (여러 줄 가능),
+"assessment_plan": 리스트, 각 항목 =
+  code (4단계 성취기준코드, 수정불가),
+  description (4단계 성취기준문장, 수정불가),
+  element (평가요소),
+  method (수업평가방법),
+  criteria (평가기준).
 평가요소, 수업방법평가, 평가기준은 예시문을 참고해서 작성해주세요요
 <예시>
 평가요소
@@ -425,10 +432,12 @@ JSON 예시:
         # JSON 파싱
         try:
             parsed = json.loads(raw_text)
+            # 5단계 추가 검증
             if step == 5:
-                # 검증
+                if not isinstance(parsed, dict):
+                    raise ValueError("5단계 응답은 dict여야 합니다.")
                 if "teaching_methods_text" not in parsed or "assessment_plan" not in parsed:
-                    raise ValueError("5단계: 'teaching_methods_text', 'assessment_plan' 모두 필요.")
+                    raise ValueError("teaching_methods_text, assessment_plan 키가 모두 필요.")
                 for ap in parsed["assessment_plan"]:
                     for field in ["code","description","element","method","criteria"]:
                         if field not in ap:
@@ -436,11 +445,11 @@ JSON 예시:
             return parsed
 
         except (json.JSONDecodeError, ValueError) as e:
-            st.warning(f"JSON 파싱 오류(단계 {step}): {e} => 기본값 사용")
+            st.warning(f"JSON 파싱 오류(단계 {step}): {e} → 빈 dict 반환")
             return {}
 
-    except Exception as e:
-        st.error(f"generate_content({step}) 중 오류: {e}")
+    except Exception as exc:
+        st.error(f"generate_content({step}) 실행 중 오류: {exc}")
         return {}
 
 # 5. 단계별 UI 함수들
@@ -881,6 +890,7 @@ def generate_lesson_plans_in_chunks(total_hours, data, chunk_size=10, vector_sto
 학습주제: 질문 약속 만들기
 학습내용: 질문을 할 때 지켜야 할 약속 만들기
          수업 중 질문, 일상 속 질문 속에서 갖추어야 할 예절 알기
+“추가 문장 없이 JSON만 보내라”
 다음 JSON 형식으로 작성:
 {{
   "lesson_plans": [
