@@ -397,6 +397,9 @@ def generate_content(step, data, vector_store):
  -가치·태도
   • 환경 공동체의식
   • 환경 실천
+{context}
+JSON 형식으로만 작성하고, 불필요한 문장은 쓰지 마세요.”, “추가 문장 없이 JSON만 반환
+총 4개의 객체가 있는 JSON 배열
 
 JSON 예시:
 [
