@@ -15,7 +15,7 @@ from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from langchain.document_loaders import UnstructuredPDFLoader
 # ---------------------------------------------------------------
 
-# 0. OpenAI 클라이언트 초기화 & 시스템 프롬프트
+
 OPENAI_API_KEY = st.secrets["openai"]["api_key"]
 if not OPENAI_API_KEY:
     st.error("OpenAI API 키가 설정되지 않았습니다. 환경 변수를 확인하세요.")
@@ -37,7 +37,6 @@ SYSTEM_PROMPT = """한국의 초등학교 2022 개정 교육과정 전문가입�
 
 # --------------------------- 추가 기능 ---------------------------
 def sidebar_typewriter_effect(text, delay=0.001):
-    """사이드바에 한 글자씩 타이핑되듯 출력"""
     placeholder = st.sidebar.empty()
     output = ""
     for char in text:
@@ -45,28 +44,27 @@ def sidebar_typewriter_effect(text, delay=0.001):
         placeholder.markdown(output)
         time.sleep(delay)
     return output
-# --------------------------- 추가 기능 끝 ---------------------------
 
 
-# 1. 페이지 기본 설정
+
+
 def set_page_config():
     try:
-        st.set_page_config(page_title="학교자율시간 계획서 생성기", page_icon="📚", layout="wide")
+        st.set_page_config(page_title="학교자율시간 올인원", page_icon="📚", layout="wide")
     except Exception as e:
         st.error(f"페이지 설정 오류: {e}")
 
-    # 전체 스타일 커스터마이징
     st.markdown("""
     <style>
-    /* 전체 페이지 여백 및 폰트 크기 조정 */
+ 
     .main .block-container {
         padding: 2rem;
         max-width: 1200px;
-        font-size: 1rem; /* 기본 폰트 크기 */
-        line-height: 1.5; /* 줄 간격 */
+        font-size: 1rem; 
+        line-height: 1.5; 
     }
 
-    /* 각 단계 헤더 스타일 */
+  
     .step-header {
         background-color: #f1f5f9;
         padding: 1.2rem;
@@ -79,7 +77,7 @@ def set_page_config():
         font-size: 1.25rem;
     }
 
-    /* 단계 진행바 컨테이너 */
+   
     .step-container-outer {
         background-color: #ffffff;
         border-radius: 10px;
@@ -88,7 +86,7 @@ def set_page_config():
         padding: 10px 20px;
     }
 
-    /* 진행바 스타일 */
+  
     .step-container {
         display: flex;
         justify-content: space-between;
@@ -155,7 +153,6 @@ def set_page_config():
         background-color: #3b82f6;
     }
 
-    /* 폼 내부 요소 약간의 간격 및 스타일 */
     .stForm {
         background: #f9fafb;
         border: 1px solid #e5e7eb;
@@ -167,7 +164,7 @@ def set_page_config():
         font-weight: 600;
     }
 
-    /* 버튼 스타일(마우스오버시 살짝 어두워짐) */
+
     button[kind="primary"] {
         border-radius: 4px;
         transition: background-color 0.2s ease;
@@ -176,7 +173,7 @@ def set_page_config():
         background-color: #2563eb !important;
     }
 
-    /* 탭 헤더 스타일 (기본 Streamlit 탭에 살짝 배경색 추가) */
+   
     .stTabs [role="tablist"] .stTabButton {
         background-color: #f1f5f9 !important;
         border: 1px solid #e5e7eb !important;
@@ -194,7 +191,7 @@ def set_page_config():
         font-weight: 600 !important;
     }
 
-    /* 사이드바 스타일 */
+   
     [data-testid="stSidebar"] {
         background-color: #f8fafc;
         border-right: 1px solid #e5e7eb;
@@ -204,7 +201,7 @@ def set_page_config():
         margin-bottom: 0.5rem;
     }
 
-    /* 사이드바에 추천 질문 목록 스타일 */
+    
     .sidebar-questions button {
         margin-bottom: 0.5rem;
         text-align: left;
@@ -221,7 +218,7 @@ def set_page_config():
     """, unsafe_allow_html=True)
 
 
-# 2. 진행 상황 표시 (계획서 생성기 전용)
+
 def show_progress():
     current_step = st.session_state.get('step', 1)
     steps = ["기본정보", "승인 신청서 다운로드", "내용체계", "성취기준", "교수학습 및 평가", "차시별계획", "최종 검토"]
@@ -255,8 +252,8 @@ def show_progress():
     st.markdown(html, unsafe_allow_html=True)
 
 
-# 3. 벡터 데이터베이스 설정 (문서 임베딩)
-@st.cache_resource(show_spinner="벡터 스토어 로딩 중...")
+
+@st.cache_resource(show_spinner="문서 로딩 완료...")
 def setup_vector_store():
     try:
         index_dir = "faiss_index"
@@ -296,7 +293,7 @@ def setup_vector_store():
         return None
 
 
-# 4. 기본 콘텐츠 함수: 단계별 내용 생성
+
 def generate_content(step, data, vector_store):
     """
     step별로 AI 프롬프트를 구성하고 JSON 형식의 응답을 받아 parsing하는 함수
@@ -316,27 +313,26 @@ def generate_content(step, data, vector_store):
             queries = query_map.get(step, "")
             context_docs = []
 
-            # (2a) 쿼리가 리스트인지 문자열인지 판별
+            
             if isinstance(queries, list):
-                # 여러 키워드 각각 검색하여 누적
                 for q in queries:
                     docs = retriever.get_relevant_documents(q)
                     context_docs.extend(docs)
             else:
-                # 단일 쿼리 문자열
+               
                 docs = retriever.get_relevant_documents(queries)
                 context_docs.extend(docs)
 
-            # (2b) 중복 제거(예: 같은 내용이 여러 번 나온 경우)
+         
             unique_dict = {}
             for d in context_docs:
                 unique_dict[d.page_content] = d
             unique_docs = list(unique_dict.values())
 
-            # (2c) 최종 context 문자열 만들기
+           
             context = "\n\n".join(doc.page_content for doc in unique_docs)
 
-        # (3) 이전 단계 데이터 불러오기
+       
 
         necessity = data.get('necessity', '')
         overview = data.get('overview', '')
@@ -344,7 +340,7 @@ def generate_content(step, data, vector_store):
         content_sets = data.get("content_sets", [])
         num_sets = len(content_sets)
 
-        # 1단계 프롬프트('성격' 제거)
+       
         step_prompts = {
             1: f"""학교자율시간 활동의 기본 정보를 작성해주세요.
 
@@ -571,7 +567,7 @@ JSON 예시:
         return {}
 
 
-# 5. 단계별 UI 함수들
+
 
 def show_step_1(vector_store):
     st.markdown("<div class='step-header'><h3>1단계: 기본 정보</h3></div>", unsafe_allow_html=True)
@@ -586,7 +582,7 @@ def show_step_1(vector_store):
 
     current_school_type = st.session_state.data.get('school_type', '초등학교')
 
-    # 학교급 바꾸기 버튼
+ 
     if st.button("학교급 바꾸기", use_container_width=True):
         if current_school_type == "초등학교":
             st.session_state.data["school_type"] = "중학교"
@@ -598,7 +594,7 @@ def show_step_1(vector_store):
         st.session_state.step = 1
         st.rerun()
 
-    # 아직 1단계 생성이 안 된 경우
+   
     if 'generated_step_1' not in st.session_state:
         with st.form("basic_info_form"):
             options = ["초등학교", "중학교"]
