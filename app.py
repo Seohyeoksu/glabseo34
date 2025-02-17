@@ -1645,7 +1645,7 @@ def main():
             st.session_state.data = {}
         if 'step' not in st.session_state:
             st.session_state.step = 1
-        st.title("2022 개정 교육과정 학교자율시간 계획서 생성기")
+        st.title("학교자율시간 올인원")
 
         vector_store = setup_vector_store()
         if not vector_store:
