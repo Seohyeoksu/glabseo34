@@ -5,7 +5,6 @@ from io import BytesIO
 import json
 import time
 
-# --------------------------- LangChain ---------------------------
 from langchain.prompts import ChatPromptTemplate
 from langchain_unstructured import UnstructuredLoader
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
@@ -13,7 +12,7 @@ from langchain_community.vectorstores import FAISS
 from langchain.chains import LLMChain
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from langchain.document_loaders import UnstructuredPDFLoader
-# ---------------------------------------------------------------
+
 
 
 OPENAI_API_KEY = st.secrets["openai"]["api_key"]
@@ -35,7 +34,7 @@ SYSTEM_PROMPT = """한국의 초등학교 2022 개정 교육과정 전문가입�
 10.초등학교 수준에 맞는 내용 구성성
 """
 
-# --------------------------- 추가 기능 ---------------------------
+
 def sidebar_typewriter_effect(text, delay=0.001):
     placeholder = st.sidebar.empty()
     output = ""
@@ -673,7 +672,7 @@ def show_step_1(vector_store):
             else:
                 st.error("모든 필수 항목을 입력해주세요.")
 
-    # 이미 1단계 생성된 경우 → 필요성, 개요 수정
+  
     if 'generated_step_1' in st.session_state:
         with st.form("edit_basic_info_form"):
             st.markdown("#### 생성된 내용 수정")
@@ -951,7 +950,7 @@ def show_step_5(vector_store):
     """
     st.markdown("<div class='step-header'><h3>5단계: 교수학습 및 평가</h3></div>", unsafe_allow_html=True)
 
-    # 이미 5단계 생성된 적이 없으면 → 자동 생성 버튼
+    
     if 'generated_step_4' not in st.session_state:
         with st.form("teaching_assessment_form"):
             st.info("교수학습방법 및 평가계획을 자동으로 생성합니다.")
@@ -970,7 +969,7 @@ def show_step_5(vector_store):
                 st.session_state.generated_step_4 = True
 
     else:
-        # 이미 평가계획이 생성되어 있을 경우 → 수정 폼
+        
         with st.form("edit_teaching_assessment_form"):
             st.markdown("#### 교수학습방법 ")
             teaching_methods_text = st.text_area(
@@ -1344,7 +1343,7 @@ def show_final_review(vector_store):
                       on_click=lambda: set_step(5),
                       use_container_width=True)
 
-        # 5) 차시별계획
+    
         with tabs[4]:
             st.markdown("### 차시별 계획")
             lesson_plans_df = pd.DataFrame(data.get('lesson_plans', []))
