@@ -1682,3 +1682,16 @@ def main():
 
 if __name__ == "__main__":
     main()
+st.markdown(
+    """
+    <div class="footer" style="text-align:center; margin-top:20px;">
+        <!-- width를 원하는 픽셀(px) 혹은 퍼센트(%)로 조정 -->
+        <img src="https://huggingface.co/spaces/powerwarez/gailabicon/resolve/main/gailab06.png"
+             alt="icon"
+             style="width:80px; height:auto;">
+        <p>제작자: 제작: 경상북도교육청 인공지능연구소(GAI LAB) 교사 서혁수</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
