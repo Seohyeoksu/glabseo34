@@ -1689,7 +1689,7 @@ st.markdown(
         <img src="https://huggingface.co/spaces/powerwarez/gailabicon/resolve/main/gailab06.png"
              alt="icon"
              style="width:80px; height:auto;">
-        <p>제작자: 제작: 경상북도교육청 인공지능연구소(GAI LAB) 교사 서혁수</p>
+        <p>제작: 경상북도교육청 인공지능연구소(GAI LAB) 교사 서혁수</p>
     </div>
     """,
     unsafe_allow_html=True
