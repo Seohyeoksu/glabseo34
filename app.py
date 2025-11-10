@@ -293,11 +293,28 @@ def setup_vector_store():
 
 
 
+def make_code_prefix(grades, subjects, activity_name):
+    """학년/교과/활동명을 바탕으로 성취기준 코드의 접두사(prefix)를 생성 - 안전한 버전"""
+    grade_part = ""
+    if grades and len(grades) > 0:
+        grade_part = grades[0].replace("학년", "").replace("학년군","").strip()
+    
+    subject_part = ""
+    if subjects and len(subjects) > 0:
+        s = subjects[0]
+        if s:  # 빈 문자열 체크
+            subject_part = s[0]
+    
+    act_part = ""
+    if activity_name and len(activity_name) > 0:
+        act_part = activity_name[:2]
+    
+    code_prefix = f"{grade_part}{subject_part}{act_part}"
+    return code_prefix
+
+
 def generate_content(step, data, vector_store):
-    """
-    step별로 AI 프롬프트를 구성하고 JSON 형식의 응답을 받아 parsing하는 함수
-    """
-    # (1) step에 따른 검색 키워드(쿼리) 설정
+    """step별로 AI 프롬프트를 구성하고 JSON 형식의 응답을 받아 parsing하는 함수"""
     query_map = {
         3: "내용체계",
         4: "성취기준",
@@ -305,33 +322,26 @@ def generate_content(step, data, vector_store):
     }
 
     try:
-        # (2) 검색 컨텍스트 준비
+        # 검색 컨텍스트 준비
         context = ""
         if step >= 3 and vector_store:
             retriever = vector_store.as_retriever()
             queries = query_map.get(step, "")
             context_docs = []
 
-            
             if isinstance(queries, list):
                 for q in queries:
                     docs = retriever.get_relevant_documents(q)
                     context_docs.extend(docs)
             else:
-               
                 docs = retriever.get_relevant_documents(queries)
                 context_docs.extend(docs)
 
-         
             unique_dict = {}
             for d in context_docs:
                 unique_dict[d.page_content] = d
             unique_docs = list(unique_dict.values())
-
-           
             context = "\n\n".join(doc.page_content for doc in unique_docs)
-
-       
 
         necessity = data.get('necessity', '')
         overview = data.get('overview', '')
@@ -339,7 +349,6 @@ def generate_content(step, data, vector_store):
         content_sets = data.get("content_sets", [])
         num_sets = len(content_sets)
 
-       
         step_prompts = {
             1: f"""학교자율시간 활동의 기본 정보를 작성해주세요.
 
@@ -360,19 +369,19 @@ def generate_content(step, data, vector_store):
 
 [예시]
 필요성:
- • 불확실한 미래사회를 살아갈 학생들에게 필수적 요소인 디지털 기기의 바른 이해와 사용법에 대한 학습이 필요
- • 디지털 기기 활용뿐 아니라 디지털 윤리에 관한 학습을 통해 디지털 리터러시와 책임감 있는 디지털 시민으로서의 역량 함양 필요
+ - 불확실한 미래사회를 살아갈 학생들에게 필수적 요소인 디지털 기기의 바른 이해와 사용법에 대한 학습이 필요
+ - 디지털 기기 활용뿐 아니라 디지털 윤리에 관한 학습을 통해 디지털 리터러시와 책임감 있는 디지털 시민으로서의 역량 함양 필요
 
 개요:
  <목적>
- • 디지털 기기 사용 경험을 바탕으로, 디지털 기술의 원리와 활용, 윤리적 문제점을 탐구하며 안전하고 책임감 있는 디지털 시민으로 성장
+ - 디지털 기기 사용 경험을 바탕으로, 디지털 기술의 원리와 활용, 윤리적 문제점을 탐구하며 안전하고 책임감 있는 디지털 시민으로 성장
  <목표>
- • 디지털 기기의 작동 원리와 활용 방법을 이해한다.
- • 디지털 기기를 안전하고 책임감 있게 사용하는 방법을 익힌다.
+ - 디지털 기기의 작동 원리와 활용 방법을 이해한다.
+ - 디지털 기기를 안전하고 책임감 있게 사용하는 방법을 익힌다.
  <주요 내용>
- • 디지털 기기 작동 원리 및 간단한 프로그래밍
- • 디지털 기기를 활용한 다양한 창작 활동
- • 디지털 윤리에 대한 이해와 실천
+ - 디지털 기기 작동 원리 및 간단한 프로그래밍
+ - 디지털 기기를 활용한 다양한 창작 활동
+ - 디지털 윤리에 대한 이해와 실천
 
 다음 JSON 형식으로 작성 (성격은 제외):
 {{
@@ -381,9 +390,7 @@ def generate_content(step, data, vector_store):
 }}
 """,
 
-            # 3단계: 내용체계
             3: f"""
-            
 {context}
 문서를 그대로 가져오는 것은 안되고 활동명: {data.get('activity_name')} 부합되도록 사용해야 한다.
 활동명: {data.get('activity_name')}
@@ -392,7 +399,7 @@ def generate_content(step, data, vector_store):
 대상 학년: {', '.join(data.get('grades', []))}을 고려해서 작성해야 한다.
 연계 교과: {', '.join(data.get('subjects', []))}
 이전 단계 결과를 참고하여 작성하기
- 핵심 아이디어는 IB교육육에서 이야기 하는 빅아이디어와 같은 거야. 학생들이 도달 할 수 있는 일반화된 이론이야 예시처럼 문장으로 진술해주세요.
+핵심 아이디어는 IB교육육에서 이야기 하는 빅아이디어와 같은 거야. 학생들이 도달 할 수 있는 일반화된 이론이야 예시처럼 문장으로 진술해주세요.
 '영역명(domain)', '핵심 아이디어(key_ideas)', '내용 요소(content_elements)'(지식·이해 / 과정·기능 / 가치·태도) 4개 세트를 생성... 를 JSON 구조로 작성해주세요. 
 'content_elements'에는 **'knowledge_and_understanding'(지식·이해), 'process_and_skills'(과정·기능), 'values_and_attitudes'(가치·태도)**가 반드시 포함되어야 합니다.
 예시를 참고하여 작성해주세요.
@@ -402,8 +409,8 @@ def generate_content(step, data, vector_store):
  기후위기와 기후행동
 
 핵심 아이디어
- • 인간은 여러 활동을 통해 기후변화를 초래하였고, 기후변화는 우리의 삶에 다방면으로 영향을 미친다.
- • 우리는 직면한 기후변화 문제를 완화하거나 적응함으로써 대처하며 생활 속에서 자신이 실천할 수 있는 방법을 탐색하고 행동해야 한다.
+ - 인간은 여러 활동을 통해 기후변화를 초래하였고, 기후변화는 우리의 삶에 다방면으로 영향을 미친다.
+ - 우리는 직면한 기후변화 문제를 완화하거나 적응함으로써 대처하며 생활 속에서 자신이 실천할 수 있는 방법을 탐색하고 행동해야 한다.
 
 내용 요소
  -지식·이해
@@ -416,7 +423,7 @@ def generate_content(step, data, vector_store):
   • 환경 공동체의식
   • 환경 실천
 {context}
-JSON 형식으로만 작성하고, 불필요한 문장은 쓰지 마세요.”, “추가 문장 없이 JSON만 반환
+JSON 형식으로만 작성하고, 불필요한 문장은 쓰지 마세요.", "추가 문장 없이 JSON만 반환
 총 4개의 객체가 있는 JSON 배열
 
 JSON 예시:
@@ -434,7 +441,6 @@ JSON 예시:
 ]
 """,
 
-            # 4단계: 성취기준
             4: f"""{context}
 이전 단계계
 활동명: {data.get('activity_name')}
@@ -469,7 +475,6 @@ JSON 예시:
 ]
 """,
 
-            # 5단계: 교수학습 및 평가 → 상/중/하를 각각 별도 필드로 생성
             5: f"""{context}
 이전 단계(성취기준): {standards}
 1.평가요소, 수업평가방법, 평가기준은 예시문을 참고해서 작성해주세요
@@ -478,21 +483,21 @@ JSON 예시:
 4.다시 강조하지만 예시문 아래 예시문 형식으로 작성하여 주세요
 <예시>
 평가요소
- • 국가유산의 의미와 유형 알아보고 가치 탐색하기
+ - 국가유산의 의미와 유형 알아보고 가치 탐색하기
 수업평가방법
  [개념학습/프로젝트]
- • 국가유산의 의미를 이해하게 한 후 기준을 세워 국가유산을 유형별로 알아보고 문화유산의 가치를 파악하는지 평가하기
+ - 국가유산의 의미를 이해하게 한 후 기준을 세워 국가유산을 유형별로 알아보고 문화유산의 가치를 파악하는지 평가하기
 평가기준
- • 상:국가유산의 의미와 유형을 정확하게 이해하고 지역의 국가유산 조사를 통해 국가유산의 가치를 설명할 수 있다.
- • 중:국가유산의 의미와 유형을 이해하고 지역의 국가유산 조사를 통해 국가유산의 가치를 설명할 수 있다.
- • 하:주변의 도움을 받아 국가유산의 의미와 유형을 설명할 수 있다.
+ - 상:국가유산의 의미와 유형을 정확하게 이해하고 지역의 국가유산 조사를 통해 국가유산의 가치를 설명할 수 있다.
+ - 중:국가유산의 의미와 유형을 이해하고 지역의 국가유산 조사를 통해 국가유산의 가치를 설명할 수 있다.
+ - 하:주변의 도움을 받아 국가유산의 의미와 유형을 설명할 수 있다.
 
 "teaching_methods_text"교수학습도 예시문을 참고해서 작성하여 주세요
 <예시>
-• 인간 활동으로 발생한 환경 영향의 긍정적인 사례와 부정적인 사례를 균형적으로 탐구하여 인간과 환경에 대한 다양한 측면을 이해하도록 한다.
-• 다양한 사례를 통하여 환경오염의 현상을 이해하도록 지도하고 지속가능한 발전으로 이어질 수 있도록 내면화에 노력한다. 
-• 학교나 지역의 다양한 체험활동 장소와 주제에 따른 계절을 고려하여 학습계획을 세워 학습을 진행한다. 
-• 탐구 및 활동 시에는 사전 준비와 안전교육 등을 통하여 탐구과정에서 발생할 수 있는 안전사고를 예방하도록 한다. 
+- 인간 활동으로 발생한 환경 영향의 긍정적인 사례와 부정적인 사례를 균형적으로 탐구하여 인간과 환경에 대한 다양한 측면을 이해하도록 한다.
+- 다양한 사례를 통하여 환경오염의 현상을 이해하도록 지도하고 지속가능한 발전으로 이어질 수 있도록 내면화에 노력한다. 
+- 학교나 지역의 다양한 체험활동 장소와 주제에 따른 계절을 고려하여 학습계획을 세워 학습을 진행한다. 
+- 탐구 및 활동 시에는 사전 준비와 안전교육 등을 통하여 탐구과정에서 발생할 수 있는 안전사고를 예방하도록 한다. 
 "teaching_methods_text": 문자열 (여러 줄 가능),
 "assessment_plan": 리스트, 각 항목 =
   code (4단계 성취기준코드, 수정불가),
@@ -545,7 +550,7 @@ JSON 예시:
 
         try:
             parsed = json.loads(raw_text)
-            # 5단계 검증 → criteria_high/mid/low 세 개 모두 있는지 검사
+            # 5단계 검증
             if step == 5:
                 if not isinstance(parsed, dict):
                     raise ValueError("5단계 응답은 dict여야 합니다.")
@@ -558,14 +563,26 @@ JSON 예시:
             return parsed
 
         except (json.JSONDecodeError, ValueError) as e:
-            st.warning(f"JSON 파싱 오류(단계 {step}): {e} → 빈 dict 반환")
+            st.warning(f"JSON 파싱 오류(단계 {step}): {e} → 기본값 반환")
+            # 단계별 기본값 반환
+            if step == 3:
+                return []
+            elif step == 4:
+                return []
+            elif step == 5:
+                return {"teaching_methods_text": "", "assessment_plan": []}
             return {}
 
     except Exception as exc:
         st.error(f"generate_content({step}) 실행 중 오류: {exc}")
+        # 단계별 기본값 반환
+        if step == 3:
+            return []
+        elif step == 4:
+            return []
+        elif step == 5:
+            return {"teaching_methods_text": "", "assessment_plan": []}
         return {}
-
-
 
 
 def show_step_1(vector_store):
@@ -581,7 +598,6 @@ def show_step_1(vector_store):
 
     current_school_type = st.session_state.data.get('school_type', '초등학교')
 
- 
     if st.button("학교급 바꾸기", use_container_width=True):
         if current_school_type == "초등학교":
             st.session_state.data["school_type"] = "중학교"
@@ -593,7 +609,6 @@ def show_step_1(vector_store):
         st.session_state.step = 1
         st.rerun()
 
-   
     if 'generated_step_1' not in st.session_state:
         with st.form("basic_info_form"):
             options = ["초등학교", "중학교"]
@@ -663,16 +678,14 @@ def show_step_1(vector_store):
                     st.session_state.data["total_hours"] = total_hours
                     st.session_state.data["semester"] = semester
 
-                    # 1단계: 필요성, 개요만 생성
                     basic_info = generate_content(1, st.session_state.data, vector_store)
                     if basic_info:
-                        st.session_state.data.update(basic_info)  # {'necessity': "...", 'overview': "..."}
+                        st.session_state.data.update(basic_info)
                         st.success("기본 정보 생성 완료.")
                         st.session_state.generated_step_1 = True
             else:
                 st.error("모든 필수 항목을 입력해주세요.")
 
-  
     if 'generated_step_1' in st.session_state:
         with st.form("edit_basic_info_form"):
             st.markdown("#### 생성된 내용 수정")
@@ -758,7 +771,7 @@ def create_approval_excel_document(selected_fields):
 def show_step_3(vector_store):
     st.markdown("<div class='step-header'><h3>3단계: 내용체계</h3></div>", unsafe_allow_html=True)
 
-    if 'generated_step_2' not in st.session_state:
+    if 'generated_step_3' not in st.session_state:  # 수정됨: step_2 -> step_3
         with st.form("generate_4sets"):
             st.info("영역명, 핵심 아이디어, 내용 요소를 **4세트** 생성합니다.")
             submit_btn = st.form_submit_button("4세트 생성 및 다음 단계로", use_container_width=True)
@@ -771,7 +784,7 @@ def show_step_3(vector_store):
                 else:
                     st.warning("4세트 형태가 아닌 응답이 왔습니다. 기본값 사용.")
                     st.session_state.data["content_sets"] = []
-                st.session_state.generated_step_2 = True
+                st.session_state.generated_step_3 = True  # 수정됨: step_2 -> step_3
     else:
         content_sets = st.session_state.data.get("content_sets", [])
         if not content_sets:
@@ -846,30 +859,11 @@ def show_step_3(vector_store):
                     st.session_state.data["domain"] = ""
                     st.session_state.data["content_elements"] = {}
 
-                del st.session_state.generated_step_2
-                st.success("4세트 내용 저장 완료. 모든 핵심아이디어를 합쳐서 반영했습니다.")
+                del st.session_state.generated_step_3  # 수정됨: step_2 -> step_3
+                st.success("4세트 내용 저장 완료.")
                 st.session_state.step = 4
                 st.rerun()
     return False
-
-
-def make_code_prefix(grades, subjects, activity_name):
-    """
-    학년/교과/활동명을 바탕으로 성취기준 코드의 접두사(prefix)를 생성.
-    예) 학년 "3학년", 과목 "과학", 활동명 "인공지능놀이터" -> "3과인공"
-    """
-    grade_part = ""
-    if grades:
-        grade_part = grades[0].replace("학년", "").replace("학년군","").strip()
-    subject_part = ""
-    if subjects:
-        s = subjects[0]
-        subject_part = s[0]
-    act_part = ""
-    if activity_name:
-        act_part = activity_name[:2]
-    code_prefix = f"{grade_part}{subject_part}{act_part}"
-    return code_prefix
 
 
 def show_step_4(vector_store):
@@ -882,7 +876,7 @@ def show_step_4(vector_store):
     content_sets = st.session_state.data.get("content_sets", [])
     num_sets = len(content_sets)
 
-    if 'generated_step_3' not in st.session_state:
+    if 'generated_step_4' not in st.session_state:  # 수정됨: step_3 -> step_4
         with st.form("standards_form"):
             st.info(f"내용체계 세트가 {num_sets}개 생성되었습니다. 따라서 성취기준도 {num_sets}개를 생성합니다.")
             submit_button = st.form_submit_button("생성 및 다음 단계로", use_container_width=True)
@@ -892,11 +886,11 @@ def show_step_4(vector_store):
                 if isinstance(standards, list) and len(standards) == num_sets:
                     st.session_state.data['standards'] = standards
                     st.success(f"성취기준 {num_sets}개 생성 완료.")
-                    st.session_state.generated_step_3 = True
+                    st.session_state.generated_step_4 = True  # 수정됨: step_3 -> step_4
                 else:
                     st.warning(f"{num_sets}개 성취기준이 아니라 기본값 사용")
                     st.session_state.data['standards'] = []
-                    st.session_state.generated_step_3 = True
+                    st.session_state.generated_step_4 = True  # 수정됨: step_3 -> step_4
     else:
         with st.form("edit_standards_form"):
             st.markdown("#### 생성된 성취기준 수정")
@@ -934,7 +928,7 @@ def show_step_4(vector_store):
         if submit_button_edit:
             with st.spinner("저장 중..."):
                 st.session_state.data['standards'] = edited_standards
-                del st.session_state.generated_step_3
+                del st.session_state.generated_step_4  # 수정됨: step_3 -> step_4
                 st.success("성취기준 저장 완료.")
                 st.session_state.step = 5
                 st.rerun()
@@ -942,16 +936,9 @@ def show_step_4(vector_store):
 
 
 def show_step_5(vector_store):
-    """
-    5단계: 교수학습 및 평가
-    - generate_content(5)를 통해 'criteria_high','criteria_mid','criteria_low'로 받음
-    - 수정 폼에서 '코드, 성취기준, 평가요소, 수업평가방법'을 한 행(row)에 배치
-      그리고 '평가기준(상, 중, 하)'은 각각 별도 text_area로 세로(행)로 배치.
-    """
     st.markdown("<div class='step-header'><h3>5단계: 교수학습 및 평가</h3></div>", unsafe_allow_html=True)
 
-    
-    if 'generated_step_4' not in st.session_state:
+    if 'generated_step_5' not in st.session_state:  # 수정됨: step_4 -> step_5
         with st.form("teaching_assessment_form"):
             st.info("교수학습방법 및 평가계획을 자동으로 생성합니다.")
             submit_button = st.form_submit_button("생성 및 다음 단계로", use_container_width=True)
@@ -966,10 +953,9 @@ def show_step_5(vector_store):
                     st.warning("교수학습 및 평가 생성 실패. 기본값 사용.")
                     st.session_state.data["teaching_methods_text"] = ""
                     st.session_state.data["assessment_plan"] = []
-                st.session_state.generated_step_4 = True
+                st.session_state.generated_step_5 = True  # 수정됨: step_4 -> step_5
 
     else:
-        
         with st.form("edit_teaching_assessment_form"):
             st.markdown("#### 교수학습방법 ")
             teaching_methods_text = st.text_area(
@@ -1000,10 +986,9 @@ def show_step_5(vector_store):
 
                 st.markdown(f"##### 평가항목 {i+1}")
 
-                # ▶ 첫 번째 행: (코드 + 성취기준) / 평가요소 / 수업평가방법
+                # 첫 번째 행: (코드 + 성취기준) / 평가요소 / 수업평가방법
                 row1_col1, row1_col2, row1_col3 = st.columns([2, 2, 2])
                 with row1_col1:
-                    # '코드'와 '성취기준'은 수정 없이 표시만
                     st.markdown(f"**코드**: `{code}`")
                     st.markdown(f"**성취기준**: {desc}")
 
@@ -1012,7 +997,7 @@ def show_step_5(vector_store):
                 with row1_col3:
                     new_meth = st.text_area("수업평가방법", value=meth, key=f"meth_{code}", height=80)
 
-                # ▶ 두 번째 행: 평가기준(상, 중, 하)를 각각 세로(행)로 배치
+                # 두 번째 행: 평가기준(상, 중, 하)를 각각 세로(행)로 배치
                 st.markdown("**평가기준(상·중·하)**")
                 crit_high_new = st.text_area(
                     "상(A) 수준 기준",
@@ -1033,7 +1018,6 @@ def show_step_5(vector_store):
                     height=80
                 )
 
-                # 수정한 내용을 new_plan에 반영
                 new_plan.append({
                     "code": code,
                     "description": desc,
@@ -1052,7 +1036,7 @@ def show_step_5(vector_store):
             with st.spinner("수정사항 저장 중..."):
                 st.session_state.data["teaching_methods_text"] = teaching_methods_text
                 st.session_state.data["assessment_plan"] = new_plan
-                del st.session_state.generated_step_4
+                del st.session_state.generated_step_5  # 수정됨: step_4 -> step_5
                 st.success("교수학습 및 평가 수정 완료.")
                 st.session_state.step = 6
                 st.rerun()
@@ -1060,9 +1044,7 @@ def show_step_5(vector_store):
     return False
 
 
-
 def generate_lesson_plans_all_at_once(total_hours, data, vector_store=None):
-    
     all_lesson_plans = []
     progress_bar = st.progress(0)
 
@@ -1077,18 +1059,17 @@ def generate_lesson_plans_all_at_once(total_hours, data, vector_store=None):
     progress_bar = st.progress(0)
     progress_text = st.empty()
 
-    
     doc_context = ""
     if vector_store:
         retriever = vector_store.as_retriever()
-        query = "지도계획"  # 원하는 검색어
+        query = "지도계획"
         relevant_docs = retriever.get_relevant_documents(query)
         doc_context = "\n\n".join(doc.page_content for doc in relevant_docs)
     
-        chunk_prompt = f"""
+    chunk_prompt = f"""
 아래 정보를 참고하여 **1차시부터 {total_hours}차시까지** 한 번에 모두 연결된 지도계획을 JSON으로 작성해주세요.
 [검색된 문서에서 가져온 맥락]
-        {doc_context}
+{doc_context}
 [이전 단계 결과]
 대상 학년 {', '.join(data.get('grades', []))}에 맞는 수준으로 작성해야 한다.
 - 영역명: {domain}
@@ -1100,7 +1081,7 @@ def generate_lesson_plans_all_at_once(total_hours, data, vector_store=None):
 - 활동명: {data.get('activity_name')}
 - 요구사항: {data.get('requirements')}
 각 차시는 다음 사항을 고려하여 작성:
-1. 대상 학년: {', '.join(data.get('grades', []))}에 알맞은 수업계획 자성하기기
+1. 대상 학년: {', '.join(data.get('grades', []))}에 알맞은 수업계획 작성하기
 2. 명확한 학습주제 재미있고 문학적 표현으로 학습주제 설정
 3. 구체적이고 학생활동 중심으로 진술하세요. ~~하기 형식으로 해주세요.
 4. 실제 수업에 필요한 교수학습자료 명시
@@ -1113,7 +1094,7 @@ def generate_lesson_plans_all_at_once(total_hours, data, vector_store=None):
 학습내용: 질문을 할 때 지켜야 할 약속 만들기
          수업 중 질문, 일상 속 질문 속에서 갖추어야 할 예절 알기
 
-“추가 문장 없이 JSON만 보내라”
+"추가 문장 없이 JSON만 보내라"
 다음 JSON 형식으로 작성:
 {{
   "lesson_plans": [
@@ -1126,7 +1107,7 @@ def generate_lesson_plans_all_at_once(total_hours, data, vector_store=None):
   ]
 }}
 """
-        messages = [
+    messages = [
         SystemMessage(content=SYSTEM_PROMPT),
         HumanMessage(content=chunk_prompt)
     ]
@@ -1135,7 +1116,7 @@ def generate_lesson_plans_all_at_once(total_hours, data, vector_store=None):
             openai_api_key=OPENAI_API_KEY,
             model="gpt-4o",  
             temperature=0.5,
-            max_tokens=3000  # 충분히 큰 값
+            max_tokens=3000
         )
         response = chat(messages)
         raw_text = response.content.strip().replace('```json','').replace('```','').strip()
@@ -1154,7 +1135,7 @@ def show_step_6(vector_store):
     total_hours = st.session_state.data.get('total_hours', 30)
     st.markdown(f"<div class='step-header'><h3>6단계: 차시별 지도계획 (총 {total_hours}차시)</h3></div>", unsafe_allow_html=True)
 
-    if 'generated_step_5' not in st.session_state:
+    if 'generated_step_6' not in st.session_state:  # 수정됨: step_5 -> step_6
         with st.form("lesson_plans_form"):
             st.info(f"총 {total_hours}차시를 한 번에 생성합니다.")
             sb = st.form_submit_button("전체 차시 생성", use_container_width=True)
@@ -1164,7 +1145,7 @@ def show_step_6(vector_store):
                 if lesson_plans:
                     st.session_state.data["lesson_plans"] = lesson_plans
                     st.success(f"{total_hours}차시 계획 생성 완료.")
-                    st.session_state.generated_step_5 = True
+                    st.session_state.generated_step_6 = True  # 수정됨: step_5 -> step_6
     else:
         with st.form("edit_lesson_plans_form"):
             st.markdown("#### 생성된 차시별 계획 수정")
@@ -1177,28 +1158,29 @@ def show_step_6(vector_store):
                     start_idx = tab_idx * 10
                     end_idx = min(start_idx + 10, total_hours)
                     for i in range(start_idx, end_idx):
-                        st.markdown(f"##### {i+1}차시")
-                        col1, col2 = st.columns([1, 2])
-                        with col1:
-                            topic = st.text_input("학습주제", value=lesson_plans[i].get('topic', ''),
-                                                  key=f"topic_{i}")
-                            materials = st.text_input("교수학습자료", value=lesson_plans[i].get('materials', ''),
-                                                      key=f"materials_{i}")
-                        with col2:
-                            content = st.text_area("학습내용", value=lesson_plans[i].get('content', ''),
-                                                   key=f"content_{i}", height=100)
-                        edited_plans.append({
-                            "lesson_number": f"{i+1}",
-                            "topic": topic,
-                            "content": content,
-                            "materials": materials
-                        })
-                        st.markdown("---")
+                        if i < len(lesson_plans):  # 추가: 인덱스 범위 체크
+                            st.markdown(f"##### {i+1}차시")
+                            col1, col2 = st.columns([1, 2])
+                            with col1:
+                                topic = st.text_input("학습주제", value=lesson_plans[i].get('topic', ''),
+                                                      key=f"topic_{i}")
+                                materials = st.text_input("교수학습자료", value=lesson_plans[i].get('materials', ''),
+                                                          key=f"materials_{i}")
+                            with col2:
+                                content = st.text_area("학습내용", value=lesson_plans[i].get('content', ''),
+                                                       key=f"content_{i}", height=100)
+                            edited_plans.append({
+                                "lesson_number": f"{i+1}",
+                                "topic": topic,
+                                "content": content,
+                                "materials": materials
+                            })
+                            st.markdown("---")
             submit_button_edit = st.form_submit_button("수정사항 저장 및 다음 단계로", use_container_width=True)
         if submit_button_edit:
             with st.spinner("저장 중..."):
                 st.session_state.data['lesson_plans'] = edited_plans
-                del st.session_state.generated_step_5
+                del st.session_state.generated_step_6  # 수정됨: step_5 -> step_6
                 st.success("차시별 계획 수정 완료.")
                 st.session_state.step = 7
                 st.rerun()
@@ -1211,7 +1193,6 @@ def show_final_review(vector_store):
         data = st.session_state.data
         tabs = st.tabs(["기본정보", "내용체계", "성취기준", "교수학습 및 평가", "차시별계획"])
 
-        # 1) 기본정보
         with tabs[0]:
             st.markdown("### 기본 정보")
             basic_info = {
@@ -1229,15 +1210,12 @@ def show_final_review(vector_store):
             for k,v in basic_info.items():
                 st.markdown(f"**{k}**: {v}")
 
-            # 원하는 단계로 돌아갈 수 있도록 버튼
             st.button("기본정보 수정하기", key="edit_basic_info",
                       on_click=lambda: set_step(1),
                       use_container_width=True)
 
-        # 2) 내용체계 (4세트 모두 표시)
         with tabs[1]:
             st.markdown("### 내용체계 (4세트)")
-
             content_sets = data.get("content_sets", [])
             if not content_sets:
                 st.warning("현재 저장된 내용체계가 없습니다.")
@@ -1284,13 +1262,11 @@ def show_final_review(vector_store):
 
                     st.divider()
 
-            # 내용체계 수정 단계(3단계)
             st.button("내용체계 수정하기",
                       key="edit_content_sets",
                       on_click=lambda: set_step(3),
                       use_container_width=True)
 
-        # 3) 성취기준
         with tabs[2]:
             st.markdown("### 성취기준")
             for std in data.get("standards", []):
@@ -1307,7 +1283,6 @@ def show_final_review(vector_store):
                       on_click=lambda: set_step(4),
                       use_container_width=True)
 
-        # 4) 교수학습 및 평가
         with tabs[3]:
             st.markdown("### 교수학습 및 평가")
             methods_text = data.get("teaching_methods_text","")
@@ -1343,7 +1318,6 @@ def show_final_review(vector_store):
                       on_click=lambda: set_step(5),
                       use_container_width=True)
 
-    
         with tabs[4]:
             st.markdown("### 차시별 계획")
             lesson_plans_df = pd.DataFrame(data.get('lesson_plans', []))
@@ -1367,7 +1341,7 @@ def show_final_review(vector_store):
                       on_click=lambda: set_step(6),
                       use_container_width=True)
 
-        # 화면 아래에 다운로드 및 처음으로 돌아가기 버튼
+        # 다운로드 및 처음으로 돌아가기 버튼
         col1, col2, col3 = st.columns(3)
         with col1:
             if st.button("모든 단계 수정하기", use_container_width=True):
@@ -1528,7 +1502,6 @@ def create_excel_document(selected_sheets):
                             "하기준": ""
                         })
 
-            # assessment_plan: code, description, element, method, criteria_high, criteria_mid, criteria_low
             for ap in data.get('assessment_plan', []):
                 sheet_rows.append({
                     "유형": "평가계획",
@@ -1682,10 +1655,10 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 st.markdown(
     """
     <div class="footer" style="text-align:center; margin-top:20px;">
-        <!-- width를 원하는 픽셀(px) 혹은 퍼센트(%)로 조정 -->
         <img src="https://huggingface.co/spaces/powerwarez/gailabicon/resolve/main/gailab06.png"
              alt="icon"
              style="width:80px; height:auto;">
@@ -1694,4 +1667,3 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
