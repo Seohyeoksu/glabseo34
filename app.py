@@ -509,22 +509,23 @@ def show_step_1():
         st.session_state.data["subjects"] = []
 
     if 'generated_step_1' not in st.session_state:
+        # 학교급 선택을 form 밖으로 이동
+        school_type = st.radio(
+            "학교급",
+            ["초등학교", "중학교"],
+            index=0 if st.session_state.data.get("school_type") == "초등학교" else 1,
+            horizontal=True,
+            key="school_type_radio"
+        )
+        
+        # 학교급 변경 시 즉시 업데이트
+        if school_type != st.session_state.data.get("school_type"):
+            st.session_state.data["school_type"] = school_type
+            st.session_state.data["grades"] = []
+            st.session_state.data["subjects"] = []
+            st.rerun()  # 페이지 리렌더링
+        
         with st.form("basic_info_form"):
-            # 학교급 선택 - 라디오 버튼으로 변경
-            school_type = st.radio(
-                "학교급",
-                ["초등학교", "중학교"],
-                index=0 if st.session_state.data.get("school_type") == "초등학교" else 1,
-                horizontal=True,
-                key="school_type_radio"
-            )
-            
-            # 학교급 변경 시 학년과 과목 자동 리셋
-            if school_type != st.session_state.data.get("school_type"):
-                st.session_state.data["school_type"] = school_type
-                st.session_state.data["grades"] = []
-                st.session_state.data["subjects"] = []
-
             total_hours = st.number_input(
                 "총 차시",
                 min_value=1, max_value=68,
@@ -1585,6 +1586,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 
 
