@@ -578,7 +578,7 @@ def show_step_1():
             requirements = st.text_area(
                 "요구사항",
                 value=st.session_state.data.get('requirements', ''),
-                placeholder="예) 디지털 리터러시 강화 필요\n예) 학생들의 주도적 학습활동 및 안전교육 병행\n등등...",
+                placeholder="예) 디지털 리터러시 강화 필요\n예) 학생들의 주도적 학습활동 및 안전교육 병행\n",
                 help="필요한 요구사항이나 핵심 요구 내용을 적어주세요.",
                 height=100
             )
@@ -1562,6 +1562,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 
 
