@@ -12,7 +12,7 @@ from langchain.schema import AIMessage, HumanMessage, SystemMessage
 # OpenAI API 키 설정
 OPENAI_API_KEY = st.secrets["openai"]["api_key"]
 if not OPENAI_API_KEY:
-    st.error("🚨 OpenAI API 키가 설정되지 않았습니다. 환경 변수를 확인하세요.")
+    st.error("OpenAI API 키가 설정되지 않았습니다. 환경 변수를 확인하세요.")
     st.stop()
 
 SYSTEM_PROMPT = """한국의 초등학교 2022 개정 교육과정 전문가입니다.
@@ -42,99 +42,37 @@ def sidebar_typewriter_effect(text, delay=0.001):
 
 def set_page_config():
     try:
-        st.set_page_config(
-            page_title="학교자율시간 올인원",
-            page_icon="🎓",
-            layout="wide",
-            initial_sidebar_state="expanded"
-        )
+        st.set_page_config(page_title="학교자율시간 올인원", page_icon="📚", layout="wide")
     except Exception as e:
         st.error(f"페이지 설정 오류: {e}")
 
-    # 현대적인 디자인 CSS
     st.markdown("""
     <style>
-    /* 메인 배경 그라디언트 */
-    .stApp {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-    
     .main .block-container {
         padding: 2rem;
-        max-width: 1400px;
+        max-width: 1200px;
         font-size: 1rem; 
-        line-height: 1.6;
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 20px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        backdrop-filter: blur(10px);
-        margin: 20px auto;
+        line-height: 1.5; 
     }
 
-    /* 제목 스타일 */
-    h1 {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 700;
-        font-size: 2.5rem;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    h2, h3 {
-        color: #2d3748;
-        font-weight: 600;
-    }
-
-    /* 스텝 헤더 카드 스타일 */
     .step-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1.5rem;
-        border-radius: 15px;
-        margin: 2rem 0;
-        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        animation: slideIn 0.5s ease-out;
+        background-color: #f1f5f9;
+        padding: 1.2rem;
+        border-radius: 0.5rem;
+        margin: 1.5rem 0 1rem;
+        border-left: 4px solid #3b82f6;
     }
-    
     .step-header h3 {
         margin: 0;
-        font-size: 1.5rem;
-        color: white;
-        font-weight: 600;
+        font-size: 1.25rem;
     }
 
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    /* Progress 스타일 개선 */
     .step-container-outer {
-        background: linear-gradient(135deg, #f6f8fb 0%, #e9ecef 100%);
-        border-radius: 20px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        margin-bottom: 2.5rem;
-        padding: 25px 30px;
-        border: 1px solid rgba(255, 255, 255, 0.8);
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .step-container-outer::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+        padding: 10px 20px;
     }
 
     .step-container {
@@ -147,332 +85,117 @@ def set_page_config():
         padding: 20px;
         gap: 0.5rem;
     }
-    
     .step-item {
         display: flex;
         flex-direction: column;
         align-items: center;
         z-index: 2;
-        transition: transform 0.3s ease;
     }
-    
-    .step-item:hover {
-        transform: translateY(-5px);
-    }
-    
     .step-circle {
-        width: 56px;
-        height: 56px;
+        width: 48px;
+        height: 48px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: bold;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
         transition: all 0.3s ease;
-        position: relative;
     }
-    
     .step-active {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background-color: #3b82f6;
         color: white;
-        box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
-        transform: scale(1.15);
+        box-shadow: 0 0 10px rgba(59,130,246,0.6);
+        transform: scale(1.1);
     }
-    
-    .step-active::after {
-        content: '';
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        border: 3px solid rgba(102, 126, 234, 0.3);
-        animation: pulse 1.5s infinite;
-    }
-    
-    @keyframes pulse {
-        0% {
-            transform: scale(1);
-            opacity: 1;
-        }
-        100% {
-            transform: scale(1.3);
-            opacity: 0;
-        }
-    }
-    
     .step-completed {
-        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        background-color: #10b981;
         color: white;
-        box-shadow: 0 4px 10px rgba(72, 187, 120, 0.3);
     }
-    
     .step-pending {
-        background: #f7fafc;
-        color: #a0aec0;
-        border: 2px solid #e2e8f0;
+        background-color: #e5e7eb;
+        color: #6b7280;
     }
-    
     .step-label {
         font-size: 0.9rem;
-        font-weight: 500;
-        color: #4a5568;
+        color: #374151;
         text-align: center;
-        margin-top: 6px;
-        width: 7rem;
+        margin-top: 4px;
+        width: 6rem;
+        white-space: nowrap;
     }
-    
     .step-line {
         height: 4px;
         flex: 1;
-        background: #e2e8f0;
+        background-color: #e5e7eb;
         margin: 0 10px;
         position: relative;
-        top: -28px;
+        top: -24px;
         z-index: 1;
-        transition: all 0.3s ease;
-        border-radius: 2px;
+        transition: background-color 0.3s ease;
     }
-    
     .step-line-completed {
-        background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+        background-color: #10b981;
     }
-    
     .step-line-active {
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background-color: #3b82f6;
     }
 
-    /* 폼 카드 스타일 */
     .stForm {
-        background: white;
-        border: 1px solid rgba(102, 126, 234, 0.2);
-        padding: 2rem;
-        border-radius: 15px;
-        margin-bottom: 2rem;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-        transition: box-shadow 0.3s ease;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
     }
-    
-    .stForm:hover {
-        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
-    }
-    
     .stForm label {
         font-weight: 600;
-        color: #4a5568;
-        margin-bottom: 0.5rem;
-        display: block;
     }
 
-    /* 버튼 스타일 개선 */
-    .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        border-radius: 10px;
-        padding: 0.75rem 2rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        width: 100%;
+    button[kind="primary"] {
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
     }
-    
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-    }
-    
-    .stButton > button:active {
-        transform: translateY(0);
+    button[kind="primary"]:hover {
+        background-color: #2563eb !important;
     }
 
-    /* 다운로드 버튼 특별 스타일 */
-    .stDownloadButton > button {
-        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-        color: white;
-        border: none;
-        border-radius: 10px;
-        padding: 0.75rem 2rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+    .stTabs [role="tablist"] .stTabButton {
+        background-color: #f1f5f9 !important;
+        border: 1px solid #e5e7eb !important;
+        border-bottom: none !important;
+        color: #1f2937 !important;
+        font-weight: 500 !important;
     }
-    
-    .stDownloadButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+    .stTabs [role="tablist"] .stTabButton[data-baseweb="tab"]:hover {
+        background-color: #e2e8f0 !important;
     }
-
-    /* 탭 스타일 개선 */
-    .stTabs [data-baseweb="tab-list"] {
-        background: linear-gradient(135deg, #f6f8fb 0%, #e9ecef 100%);
-        border-radius: 15px;
-        padding: 5px;
-        gap: 10px;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        background: transparent;
-        border: none;
-        color: #718096;
-        font-weight: 500;
-        border-radius: 10px;
-        padding: 10px 20px;
-        transition: all 0.3s ease;
-    }
-    
-    .stTabs [data-baseweb="tab"]:hover {
-        background: rgba(255, 255, 255, 0.5);
-        color: #4a5568;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background: white !important;
-        color: #667eea !important;
+    .stTabs [role="tablist"] .stTabButton[data-baseweb="tab"][aria-selected="true"] {
+        background-color: #ffffff !important;
+        border-top: 3px solid #3b82f6 !important;
+        color: #1f2937 !important;
         font-weight: 600 !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
-    /* 사이드바 스타일 */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
-        border-right: 1px solid rgba(0, 0, 0, 0.1);
+        background-color: #f8fafc;
+        border-right: 1px solid #e5e7eb;
     }
-    
-    [data-testid="stSidebar"] h2 {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 700;
-        margin-bottom: 1rem;
+    [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
     }
 
-    /* 추천 질문 버튼 */
     .sidebar-questions button {
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.5rem;
         text-align: left;
-        background: white !important;
-        color: #4a5568 !important;
+        background: #f1f5f9 !important;
+        color: #111827 !important;
         width: 100%;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 0.75rem;
-        transition: all 0.3s ease;
-        font-size: 0.9rem;
+        border: 1px solid #e5e7eb;
     }
-    
     .sidebar-questions button:hover {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: white !important;
-        transform: translateX(5px);
-    }
-
-    /* Input 필드 스타일 */
-    .stTextInput > div > div > input,
-    .stTextArea > div > div > textarea,
-    .stSelectbox > div > div > select,
-    .stMultiSelect > div > div {
-        border: 2px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 0.75rem;
-        transition: all 0.3s ease;
-        background: white;
-    }
-    
-    .stTextInput > div > div > input:focus,
-    .stTextArea > div > div > textarea:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    /* Info, Warning, Success 메시지 스타일 */
-    .stAlert {
-        border-radius: 10px;
-        border-left: 4px solid;
-        animation: slideIn 0.3s ease-out;
-    }
-
-    /* 라디오 버튼 스타일 */
-    .stRadio > div {
-        display: flex;
-        gap: 1rem;
-        background: white;
-        padding: 1rem;
-        border-radius: 10px;
-        border: 1px solid #e2e8f0;
-    }
-    
-    .stRadio > div > label {
-        background: #f7fafc;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: 2px solid transparent;
-    }
-    
-    .stRadio > div > label:hover {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-        border-color: #667eea;
-    }
-    
-    .stRadio > div > label > div[role="radio"][aria-checked="true"] {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    /* 멀티셀렉트 태그 스타일 */
-    .stMultiSelect span[data-baseweb="tag"] {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 20px;
-        padding: 5px 12px;
-        font-size: 0.9rem;
-        font-weight: 500;
-    }
-
-    /* 데이터프레임 스타일 */
-    .stDataFrame {
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    }
-
-    /* 컬럼 레이아웃 카드 */
-    .css-1d391kg {
-        background: white;
-        padding: 1rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    /* 스크롤바 스타일 */
-    ::-webkit-scrollbar {
-        width: 10px;
-        height: 10px;
-    }
-    
-    ::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 10px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-    }
-
-    /* 로딩 스피너 커스텀 */
-    .stSpinner > div {
-        border-color: #667eea;
-    }
-
-    /* 전환 애니메이션 */
-    * {
-        transition: all 0.3s ease;
+        background: #e2e8f0 !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -480,7 +203,7 @@ def set_page_config():
 
 def show_progress():
     current_step = st.session_state.get('step', 1)
-    steps = ["📋 기본정보", "📥 승인신청서", "📚 내용체계", "🎯 성취기준", "📝 교수평가", "📅 차시계획", "✅ 최종검토"]
+    steps = ["기본정보", "승인 신청서 다운로드", "내용체계", "성취기준", "교수학습 및 평가", "차시별계획", "최종 검토"]
 
     html = '<div class="step-container-outer"><div class="step-container">'
     for i, step_label in enumerate(steps, 1):
@@ -535,9 +258,6 @@ def generate_content(step, data):
     """step별로 AI 프롬프트를 구성하고 JSON 형식의 응답을 받아 parsing하는 함수"""
     
     try:
-        school_type = data.get('school_type', '초등학교')
-        target_level = "초등학교 3, 4학년" if school_type == "초등학교" else "중학교"
-        
         necessity = data.get('necessity', '')
         overview = data.get('overview', '')
         standards = data.get('standards', [])
@@ -549,13 +269,11 @@ def generate_content(step, data):
 
 활동명: {data.get('activity_name')}
 요구사항: {data.get('requirements')}
-학교급: {school_type}
+학교급: {data.get('school_type')}
 대상 학년: {', '.join(data.get('grades', []))}
 연계 교과: {', '.join(data.get('subjects', []))}
 총 차시: {data.get('total_hours')}차시
 운영 학기: {', '.join(data.get('semester', []))}
-
-학교급이 {school_type}이므로 {target_level} 수준에 맞게 작성해주세요.
 
 아래 예시와 같이, 주어진 **활동명**에 종속되어 결과물이 도출되도록 
 '필요성(necessity)', '개요(overview)'만 작성해 주세요.
@@ -590,12 +308,9 @@ def generate_content(step, data):
             3: f"""
 활동명: {data.get('activity_name')} 부합되도록 작성해주세요.
 요구사항: {data.get('requirements')}을 가장 많이 반영해서 작성하면 좋겠어.
-학교급: {school_type}도 반영해야 한다. 
+학교급: {data.get('school_type')}도 반영해야 한다. 
 대상 학년: {', '.join(data.get('grades', []))}을 고려해서 작성해야 한다.
 연계 교과: {', '.join(data.get('subjects', []))}
-
-{target_level} 수준에 맞게 작성해주세요.
-
 이전 단계 결과를 참고하여 작성하기
 핵심 아이디어는 IB교육육에서 이야기 하는 빅아이디어와 같은 거야. 학생들이 도달 할 수 있는 일반화된 이론이야 예시처럼 문장으로 진술해주세요.
 '영역명(domain)', '핵심 아이디어(key_ideas)', '내용 요소(content_elements)'(지식·이해 / 과정·기능 / 가치·태도) 4개 세트를 생성... 를 JSON 구조로 작성해주세요. 
@@ -644,12 +359,10 @@ JSON 예시:
 이전 단계
 활동명: {data.get('activity_name')}
 요구사항: {data.get('requirements')}
-학교급: {school_type}
+학교급: {data.get('school_type')}
 대상 학년: {', '.join(data.get('grades', []))}
 연계 교과: {', '.join(data.get('subjects', []))} 
 내용 체계: {content_sets}
-
-학교급이 {school_type}이므로 {target_level} 수준에 맞게 작성해주세요.
 
 총 {num_sets}개 내용체계 세트가 생성되었으므로, 성취기준도 {num_sets}개 생성.
 
@@ -679,11 +392,6 @@ JSON 예시:
 
             5: f"""
 이전 단계(성취기준): {standards}
-학교급: {school_type}
-대상 학년: {', '.join(data.get('grades', []))}
-
-{target_level} 수준에 맞게 작성해주세요.
-
 1.평가요소, 수업평가방법, 평가기준은 예시문을 참고해서 작성해주세요
 2.평가기준은 상,중,하로 나누어서 작성하여 주세요.
 3.평가요소는 ~하기 형식으로 만들어 주세요.
@@ -790,7 +498,7 @@ JSON 예시:
 
 
 def show_step_1():
-    st.markdown("<div class='step-header'><h3>📋 1단계: 기본 정보 입력</h3></div>", unsafe_allow_html=True)
+    st.markdown("<div class='step-header'><h3>1단계: 기본 정보</h3></div>", unsafe_allow_html=True)
 
     # 기본값 설정
     if "school_type" not in st.session_state.data:
@@ -802,89 +510,83 @@ def show_step_1():
 
     if 'generated_step_1' not in st.session_state:
         with st.form("basic_info_form"):
-            col1, col2 = st.columns(2)
+            # 학교급 선택 - 라디오 버튼으로 변경
+            school_type = st.radio(
+                "학교급",
+                ["초등학교", "중학교"],
+                index=0 if st.session_state.data.get("school_type") == "초등학교" else 1,
+                horizontal=True,
+                key="school_type_radio"
+            )
             
-            with col1:
-                # 학교급 선택
-                school_type = st.radio(
-                    "🏫 학교급",
-                    ["초등학교", "중학교"],
-                    index=0 if st.session_state.data.get("school_type", "초등학교") == "초등학교" else 1,
-                    horizontal=True,
-                    key="school_type_radio_widget"
-                )
-                
-                # 학년 선택 - 학교급에 따라 동적으로 변경
-                st.markdown("#### 📚 학년 선택")
-                if school_type == "초등학교":
-                    grades = st.multiselect(
-                        "대상 학년",
-                        ["3학년", "4학년", "5학년", "6학년"],
-                        default=[],
-                        key="elem_grades_widget"
-                    )
-                else:  # 중학교
-                    grades = st.multiselect(
-                        "대상 학년",
-                        ["1학년", "2학년", "3학년"],
-                        default=[],
-                        key="mid_grades_widget"
-                    )
+            # 학교급 변경 시 학년과 과목 자동 리셋
+            if school_type != st.session_state.data.get("school_type"):
+                st.session_state.data["school_type"] = school_type
+                st.session_state.data["grades"] = []
+                st.session_state.data["subjects"] = []
 
-                total_hours = st.number_input(
-                    "⏱️ 총 차시",
-                    min_value=1, max_value=68,
-                    value=st.session_state.data.get('total_hours', 34),
-                    help="총 수업 차시를 입력하세요"
-                )
+            total_hours = st.number_input(
+                "총 차시",
+                min_value=1, max_value=68,
+                value=st.session_state.data.get('total_hours', 34),
+                help="총 차시 입력"
+            )
 
-            with col2:
-                # 과목 선택 - 학교급에 따라 동적으로 변경
-                st.markdown("#### 📖 연계 교과 선택")
-                if school_type == "초등학교":
-                    subjects = st.multiselect(
-                        "연계 교과",
-                        ["국어", "수학", "사회", "과학", "영어", "음악", "미술", "체육", "실과", "도덕"],
-                        default=[],
-                        key="elem_subjects_widget"
-                    )
-                else:  # 중학교
-                    subjects = st.multiselect(
-                        "연계 교과",
-                        ["국어", "수학", "사회", "역사", "과학", "기술·가정", "영어", "음악", "미술", 
-                         "체육", "정보", "도덕", "보건", "진로와 직업", "한문", "환경"],
-                        default=[],
-                        key="mid_subjects_widget"
-                    )
+            semester = st.multiselect(
+                "운영 학기",
+                ["1학기", "2학기"],
+                default=st.session_state.data.get('semester', ["1학기"])
+            )
 
-                semester = st.multiselect(
-                    "📅 운영 학기",
-                    ["1학기", "2학기"],
-                    default=["1학기"]
-                )
-
-            st.markdown("---")
+            st.markdown("#### 학년 선택")
             
+            # 학교급에 따라 다른 학년과 과목 옵션 제공
+            if school_type == "초등학교":
+                grades = st.multiselect(
+                    "학년",
+                    ["3학년", "4학년", "5학년", "6학년"],
+                    default=st.session_state.data.get('grades', []),
+                    key="elem_grades"
+                )
+                subjects = st.multiselect(
+                    "교과",
+                    ["국어", "수학", "사회", "과학", "영어", "음악", "미술", "체육", "실과", "도덕"],
+                    default=st.session_state.data.get('subjects', []),
+                    key="elem_subjects"
+                )
+            else:  # 중학교
+                grades = st.multiselect(
+                    "학년",
+                    ["1학년", "2학년", "3학년"],
+                    default=st.session_state.data.get('grades', []),
+                    key="mid_grades"
+                )
+                subjects = st.multiselect(
+                    "교과",
+                    ["국어", "수학", "사회/역사", "과학/기술", "영어", "음악", "미술", "체육", 
+                     "정보", "도덕", "보건", "진로와 직업", "한문", "환경과 녹색성장"],
+                    default=st.session_state.data.get('subjects', []),
+                    key="mid_subjects"
+                )
+
             activity_name = st.text_input(
-                "✨ 활동명",
+                "활동명",
                 value=st.session_state.data.get('activity_name', ''),
-                placeholder="예: 인공지능 놀이터, 세계 문화 탐험, 창의 메이커 교실 등"
+                placeholder="예: 인공지능 놀이터"
             )
-            
             requirements = st.text_area(
-                "📝 요구사항",
+                "요구사항",
                 value=st.session_state.data.get('requirements', ''),
-                placeholder="예) 디지털 리터러시 강화 필요\n예) 학생들의 주도적 학습활동 및 안전교육 병행\n예) 창의적 문제해결 능력 향상",
-                help="활동에 필요한 핵심 요구사항을 입력하세요",
-                height=120
+                placeholder="예) 디지털 리터러시 강화 필요\n예) 학생들의 주도적 학습활동 및 안전교육 병행\n등등...",
+                help="필요한 요구사항이나 핵심 요구 내용을 적어주세요.",
+                height=100
             )
 
-            submit_button = st.form_submit_button("🚀 정보 생성 및 다음 단계로", use_container_width=True)
+            submit_button = st.form_submit_button("정보 생성 및 다음 단계로", use_container_width=True)
 
         if submit_button:
             if activity_name and requirements and grades and subjects and semester:
-                with st.spinner("✨ AI가 교육과정을 생성 중입니다..."):
-                    # 데이터 저장
+                with st.spinner("정보 생성 중..."):
                     st.session_state.data["school_type"] = school_type
                     st.session_state.data["grades"] = grades
                     st.session_state.data["subjects"] = subjects
@@ -896,56 +598,57 @@ def show_step_1():
                     basic_info = generate_content(1, st.session_state.data)
                     if basic_info:
                         st.session_state.data.update(basic_info)
-                        st.success("✅ 기본 정보 생성이 완료되었습니다!")
+                        st.success("기본 정보 생성 완료.")
                         st.session_state.generated_step_1 = True
-                        st.rerun()
             else:
-                st.error("⚠️ 모든 필수 항목을 입력해주세요.")
+                st.error("모든 필수 항목을 입력해주세요.")
 
     if 'generated_step_1' in st.session_state:
-        # 학교급 정보 표시
-        st.info(f"🏫 현재 선택된 학교급: **{st.session_state.data.get('school_type', '초등학교')}**")
+        # 학교급 변경 버튼 추가
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            if st.button("🔄 학교급 변경", use_container_width=True):
+                # 현재 학교급 변경
+                current = st.session_state.data.get('school_type', '초등학교')
+                new_school_type = "중학교" if current == "초등학교" else "초등학교"
+                
+                # 데이터 초기화
+                st.session_state.data["school_type"] = new_school_type
+                st.session_state.data["grades"] = []
+                st.session_state.data["subjects"] = []
+                
+                # 생성된 정보 삭제
+                if 'generated_step_1' in st.session_state:
+                    del st.session_state.generated_step_1
+                
+                # 1단계로 리셋
+                st.session_state.step = 1
+                st.rerun()
         
-        # 학교급 변경 버튼
-        if st.button("🔄 학교급 변경 (초등학교 ↔ 중학교)", use_container_width=True):
-            # 현재 학교급 변경
-            current = st.session_state.data.get('school_type', '초등학교')
-            new_school_type = "중학교" if current == "초등학교" else "초등학교"
-            
-            # 데이터 초기화
-            st.session_state.data["school_type"] = new_school_type
-            st.session_state.data["grades"] = []
-            st.session_state.data["subjects"] = []
-            
-            # 생성된 정보 삭제
-            if 'generated_step_1' in st.session_state:
-                del st.session_state.generated_step_1
-            
-            # 1단계로 리셋
-            st.session_state.step = 1
-            st.rerun()
+        with col2:
+            st.info(f"현재 선택된 학교급: {st.session_state.data.get('school_type', '초등학교')}")
         
         with st.form("edit_basic_info_form"):
-            st.markdown("#### ✏️ 생성된 내용 수정")
+            st.markdown("#### 생성된 내용 수정")
             necessity = st.text_area(
-                "📌 활동의 필요성",
+                "활동의 필요성",
                 value=st.session_state.data.get('necessity', ''),
                 height=150
             )
             overview = st.text_area(
-                "📊 활동 개요",
+                "활동 개요",
                 value=st.session_state.data.get('overview', ''),
                 height=150
             )
 
-            submit_button_edit = st.form_submit_button("💾 수정사항 저장 및 다음 단계로", use_container_width=True)
+            submit_button_edit = st.form_submit_button("수정사항 저장 및 다음 단계로", use_container_width=True)
 
         if submit_button_edit:
-            with st.spinner("💾 수정사항 저장 중..."):
+            with st.spinner("수정사항 저장 중..."):
                 st.session_state.data["necessity"] = necessity
                 st.session_state.data["overview"] = overview
                 del st.session_state.generated_step_1
-                st.success("✅ 수정사항이 저장되었습니다!")
+                st.success("수정사항 저장 완료.")
                 st.session_state.step = 2
                 st.rerun()
 
@@ -953,13 +656,13 @@ def show_step_1():
 
 
 def show_step_2_approval():
-    st.markdown("<div class='step-header'><h3>📥 2단계: 자율시간 승인 신청서 다운로드</h3></div>", unsafe_allow_html=True)
-    st.info("📋 입력한 기본 정보를 바탕으로 승인 신청서 엑셀 파일을 생성합니다.")
+    st.markdown("<div class='step-header'><h3>2단계: 자율시간 승인 신청서 다운로드</h3></div>", unsafe_allow_html=True)
+    st.info("입력한 기본 정보를 바탕으로 승인 신청서 엑셀 파일을 생성합니다.")
 
     fields = ["학교급", "대상 학년", "총 차시", "운영 학기", "연계 교과", "활동명", "요구사항", "필요성", "개요"]
 
     selected_fields = st.multiselect(
-        "📌 다운로드할 항목 선택:",
+        "다운로드할 항목 선택:",
         options=fields,
         default=fields,
         help="원하는 항목만 선택하여 파일에 포함할 수 있습니다."
@@ -967,16 +670,15 @@ def show_step_2_approval():
     if selected_fields:
         excel_data = create_approval_excel_document(selected_fields)
         st.download_button(
-            "📥 자율시간 승인 신청서 다운로드", 
-            excel_data,
+            "자율시간 승인 신청서 다운로드", excel_data,
             file_name=f"{st.session_state.data.get('activity_name', '자율시간승인신청서')}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             use_container_width=True
         )
     else:
-        st.warning("⚠️ 최소 하나의 항목을 선택해주세요.")
+        st.warning("최소 하나의 항목을 선택해주세요.")
 
-    if st.button("➡️ 다음 단계로", use_container_width=True):
+    if st.button("다음 단계로", use_container_width=True):
         st.session_state.step = 3
         st.rerun()
 
@@ -1008,32 +710,31 @@ def create_approval_excel_document(selected_fields):
 
 
 def show_step_3():
-    st.markdown("<div class='step-header'><h3>📚 3단계: 내용체계 구성</h3></div>", unsafe_allow_html=True)
+    st.markdown("<div class='step-header'><h3>3단계: 내용체계</h3></div>", unsafe_allow_html=True)
 
     if 'generated_step_3' not in st.session_state:
         with st.form("generate_4sets"):
-            st.info("🎯 영역명, 핵심 아이디어, 내용 요소를 **4세트** 생성합니다.")
-            submit_btn = st.form_submit_button("🚀 4세트 생성 및 다음 단계로", use_container_width=True)
+            st.info("영역명, 핵심 아이디어, 내용 요소를 **4세트** 생성합니다.")
+            submit_btn = st.form_submit_button("4세트 생성 및 다음 단계로", use_container_width=True)
         if submit_btn:
-            with st.spinner("✨ AI가 내용체계를 구성 중입니다..."):
+            with st.spinner("생성 중..."):
                 content = generate_content(3, st.session_state.data)
                 if isinstance(content, list) and len(content) == 4:
                     st.session_state.data["content_sets"] = content
-                    st.success("✅ 4세트 내용체계 생성이 완료되었습니다!")
+                    st.success("4세트 내용체계 생성 완료.")
                 else:
-                    st.warning("⚠️ 4세트 형태가 아닌 응답이 왔습니다. 기본값 사용.")
+                    st.warning("4세트 형태가 아닌 응답이 왔습니다. 기본값 사용.")
                     st.session_state.data["content_sets"] = []
                 st.session_state.generated_step_3 = True
-                st.rerun()
     else:
         content_sets = st.session_state.data.get("content_sets", [])
         if not content_sets:
             content_sets = []
 
         with st.form("edit_4sets_form"):
-            st.markdown("#### ✏️ 생성된 4세트 내용체계 수정")
+            st.markdown("#### 생성된 4세트 내용체계 수정")
             new_sets = []
-            tabs = st.tabs([f"📖 내용체계 {i+1}" for i in range(4)])
+            tabs = st.tabs([f"내용체계 {i+1}" for i in range(4)])
             for i, tab in enumerate(tabs):
                 with tab:
                     if i < len(content_sets):
@@ -1048,10 +749,10 @@ def show_step_3():
                                 "values_and_attitudes": []
                             }
                         }
-                    domain_input = st.text_input("🏷️ 영역명", value=cset.get("domain",""), key=f"domain_{i}")
+                    domain_input = st.text_input("영역명", value=cset.get("domain",""), key=f"domain_{i}")
                     ki_list = cset.get("key_ideas", [])
                     ki_text = "\n".join(ki_list) if ki_list else ""
-                    ki_input = st.text_area("💡 핵심 아이디어", value=ki_text, height=100, key=f"ki_{i}")
+                    ki_input = st.text_area("핵심 아이디어", value=ki_text, height=80, key=f"ki_{i}")
 
                     ce = cset.get("content_elements", {})
                     kua = ce.get("knowledge_and_understanding", [])
@@ -1060,17 +761,17 @@ def show_step_3():
 
                     col1, col2, col3 = st.columns(3)
                     with col1:
-                        st.markdown("##### 📚 지식·이해")
+                        st.markdown("##### 지식·이해")
                         kua_text = "\n".join(kua) if kua else ""
-                        kua_input = st.text_area("", value=kua_text, height=120, key=f"kua_{i}")
+                        kua_input = st.text_area("knowledge_and_understanding", value=kua_text, height=120, key=f"kua_{i}")
                     with col2:
-                        st.markdown("##### ⚙️ 과정·기능")
+                        st.markdown("##### 과정·기능")
                         pns_text = "\n".join(pns) if pns else ""
-                        pns_input = st.text_area("", value=pns_text, height=120, key=f"pns_{i}")
+                        pns_input = st.text_area("process_and_skills", value=pns_text, height=120, key=f"pns_{i}")
                     with col3:
-                        st.markdown("##### 💝 가치·태도")
+                        st.markdown("##### 가치·태도")
                         vat_text = "\n".join(vat) if vat else ""
-                        vat_input = st.text_area("", value=vat_text, height=120, key=f"vat_{i}")
+                        vat_input = st.text_area("values_and_attitudes", value=vat_text, height=120, key=f"vat_{i}")
 
                     new_sets.append({
                         "domain": domain_input,
@@ -1082,10 +783,10 @@ def show_step_3():
                         }
                     })
 
-            submit_edit = st.form_submit_button("💾 4세트 저장 및 다음 단계로", use_container_width=True)
+            submit_edit = st.form_submit_button("4세트 저장 및 다음 단계로", use_container_width=True)
 
         if submit_edit:
-            with st.spinner("💾 저장 중..."):
+            with st.spinner("저장 중..."):
                 st.session_state.data["content_sets"] = new_sets
                 combined_key_ideas = []
                 for cset in new_sets:
@@ -1100,14 +801,14 @@ def show_step_3():
                     st.session_state.data["content_elements"] = {}
 
                 del st.session_state.generated_step_3
-                st.success("✅ 4세트 내용이 저장되었습니다!")
+                st.success("4세트 내용 저장 완료.")
                 st.session_state.step = 4
                 st.rerun()
     return False
 
 
 def show_step_4():
-    st.markdown("<div class='step-header'><h3>🎯 4단계: 성취기준 설정</h3></div>", unsafe_allow_html=True)
+    st.markdown("<div class='step-header'><h3>4단계: 성취기준 설정</h3></div>", unsafe_allow_html=True)
     code_prefix = make_code_prefix(
         st.session_state.data.get('grades', []),
         st.session_state.data.get('subjects', []),
@@ -1118,41 +819,40 @@ def show_step_4():
 
     if 'generated_step_4' not in st.session_state:
         with st.form("standards_form"):
-            st.info(f"📊 내용체계 세트가 {num_sets}개 생성되었습니다. 따라서 성취기준도 {num_sets}개를 생성합니다.")
-            submit_button = st.form_submit_button("🚀 생성 및 다음 단계로", use_container_width=True)
+            st.info(f"내용체계 세트가 {num_sets}개 생성되었습니다. 따라서 성취기준도 {num_sets}개를 생성합니다.")
+            submit_button = st.form_submit_button("생성 및 다음 단계로", use_container_width=True)
         if submit_button:
-            with st.spinner("✨ AI가 성취기준을 설정 중입니다..."):
+            with st.spinner("생성 중..."):
                 standards = generate_content(4, st.session_state.data)
                 if isinstance(standards, list) and len(standards) == num_sets:
                     st.session_state.data['standards'] = standards
-                    st.success(f"✅ 성취기준 {num_sets}개 생성이 완료되었습니다!")
+                    st.success(f"성취기준 {num_sets}개 생성 완료.")
                     st.session_state.generated_step_4 = True
                 else:
-                    st.warning(f"⚠️ {num_sets}개 성취기준이 아니라 기본값 사용")
+                    st.warning(f"{num_sets}개 성취기준이 아니라 기본값 사용")
                     st.session_state.data['standards'] = []
                     st.session_state.generated_step_4 = True
-                st.rerun()
     else:
         with st.form("edit_standards_form"):
-            st.markdown("#### ✏️ 생성된 성취기준 수정")
+            st.markdown("#### 생성된 성취기준 수정")
             edited_standards = []
             for i, standard in enumerate(st.session_state.data.get('standards', [])):
-                st.markdown(f"##### 🎯 성취기준 {i+1}")
-                code = st.text_input("📌 성취기준 코드", value=standard['code'], key=f"std_code_{i}")
-                description = st.text_area("📝 성취기준 설명", value=standard['description'],
-                                          key=f"std_desc_{i}", height=100)
-                st.markdown("##### 📊 수준별 성취기준")
+                st.markdown(f"##### 성취기준 {i+1}")
+                code = st.text_input("성취기준 코드", value=standard['code'], key=f"std_code_{i}")
+                description = st.text_area("성취기준 설명", value=standard['description'],
+                                           key=f"std_desc_{i}", height=100)
+                st.markdown("##### 수준별 성취기준 (상, 중, 하)")
                 col1, col2, col3 = st.columns(3)
                 with col1:
-                    a_desc = st.text_area("⭐ 상(A) 수준",
+                    a_desc = st.text_area("상(A) 수준",
                                           value=next((l['description'] for l in standard['levels'] if l['level'] == 'A'), ''),
                                           key=f"std_{i}_level_A", height=100)
                 with col2:
-                    b_desc = st.text_area("✨ 중(B) 수준",
+                    b_desc = st.text_area("중(B) 수준",
                                           value=next((l['description'] for l in standard['levels'] if l['level'] == 'B'), ''),
                                           key=f"std_{i}_level_B", height=100)
                 with col3:
-                    c_desc = st.text_area("🌟 하(C) 수준",
+                    c_desc = st.text_area("하(C) 수준",
                                           value=next((l['description'] for l in standard['levels'] if l['level'] == 'C'), ''),
                                           key=f"std_{i}_level_C", height=100)
                 edited_standards.append({
@@ -1165,50 +865,53 @@ def show_step_4():
                     ]
                 })
                 st.markdown("---")
-            submit_button_edit = st.form_submit_button("💾 수정사항 저장 및 다음 단계로", use_container_width=True)
+            submit_button_edit = st.form_submit_button("수정사항 저장 및 다음 단계로", use_container_width=True)
         if submit_button_edit:
-            with st.spinner("💾 저장 중..."):
+            with st.spinner("저장 중..."):
                 st.session_state.data['standards'] = edited_standards
                 del st.session_state.generated_step_4
-                st.success("✅ 성취기준이 저장되었습니다!")
+                st.success("성취기준 저장 완료.")
                 st.session_state.step = 5
                 st.rerun()
     return False
 
 
 def show_step_5():
-    st.markdown("<div class='step-header'><h3>📝 5단계: 교수학습 및 평가 계획</h3></div>", unsafe_allow_html=True)
+    st.markdown("<div class='step-header'><h3>5단계: 교수학습 및 평가</h3></div>", unsafe_allow_html=True)
 
     if 'generated_step_5' not in st.session_state:
         with st.form("teaching_assessment_form"):
-            st.info("🎓 교수학습방법 및 평가계획을 자동으로 생성합니다.")
-            submit_button = st.form_submit_button("🚀 생성 및 다음 단계로", use_container_width=True)
+            st.info("교수학습방법 및 평가계획을 자동으로 생성합니다.")
+            submit_button = st.form_submit_button("생성 및 다음 단계로", use_container_width=True)
         if submit_button:
-            with st.spinner("✨ AI가 교수학습 및 평가 계획을 수립 중입니다..."):
+            with st.spinner("생성 중..."):
                 result = generate_content(5, st.session_state.data)
                 if result:
                     st.session_state.data["teaching_methods_text"] = result.get("teaching_methods_text", "")
                     st.session_state.data["assessment_plan"] = result.get("assessment_plan", [])
-                    st.success("✅ 교수학습 및 평가 계획이 완료되었습니다!")
+                    st.success("교수학습 및 평가 생성 완료.")
                 else:
-                    st.warning("⚠️ 교수학습 및 평가 생성 실패. 기본값 사용.")
+                    st.warning("교수학습 및 평가 생성 실패. 기본값 사용.")
                     st.session_state.data["teaching_methods_text"] = ""
                     st.session_state.data["assessment_plan"] = []
                 st.session_state.generated_step_5 = True
-                st.rerun()
 
     else:
         with st.form("edit_teaching_assessment_form"):
-            st.markdown("#### 🎓 교수학습방법")
+            st.markdown("#### 교수학습방법 ")
             teaching_methods_text = st.text_area(
-                "",
+                "교수학습방법",
                 value=st.session_state.data.get("teaching_methods_text", ""),
-                height=150,
-                help="줄바꿈으로 여러 방법을 구분하세요"
+                height=120,
+                help="줄바꿈으로 여러 방법을 구분"
             )
 
-            st.markdown("---")
-            st.markdown("#### 📊 평가계획")
+            st.markdown("""
+            ---
+            #### 평가계획
+            - 코드, 성취기준, 평가요소, 수업평가방법을 한 행에 배치  
+            - 평가기준(상·중·하)는 세로(행)로 각각 배치  
+            """)
 
             old_plan = st.session_state.data.get("assessment_plan", [])
             new_plan = []
@@ -1222,9 +925,9 @@ def show_step_5():
                 crit_mid = ap.get("criteria_mid", "")
                 crit_low = ap.get("criteria_low", "")
 
-                st.markdown(f"##### 📌 평가항목 {i+1}")
+                st.markdown(f"##### 평가항목 {i+1}")
 
-                # 첫 번째 행
+                # 첫 번째 행: (코드 + 성취기준) / 평가요소 / 수업평가방법
                 row1_col1, row1_col2, row1_col3 = st.columns([2, 2, 2])
                 with row1_col1:
                     st.markdown(f"**코드**: `{code}`")
@@ -1235,22 +938,22 @@ def show_step_5():
                 with row1_col3:
                     new_meth = st.text_area("수업평가방법", value=meth, key=f"meth_{code}", height=80)
 
-                # 평가기준
-                st.markdown("**📊 평가기준**")
+                # 두 번째 행: 평가기준(상, 중, 하)를 각각 세로(행)로 배치
+                st.markdown("**평가기준(상·중·하)**")
                 crit_high_new = st.text_area(
-                    "⭐ 상(A) 수준",
+                    "상(A) 수준 기준",
                     value=crit_high,
                     key=f"critH_{code}",
                     height=80
                 )
                 crit_mid_new = st.text_area(
-                    "✨ 중(B) 수준",
+                    "중(B) 수준 기준",
                     value=crit_mid,
                     key=f"critM_{code}",
                     height=80
                 )
                 crit_low_new = st.text_area(
-                    "🌟 하(C) 수준",
+                    "하(C) 수준 기준",
                     value=crit_low,
                     key=f"critL_{code}",
                     height=80
@@ -1268,14 +971,14 @@ def show_step_5():
 
                 st.markdown("---")
 
-            submit_button_edit = st.form_submit_button("💾 수정사항 저장 및 다음 단계로", use_container_width=True)
+            submit_button_edit = st.form_submit_button("수정사항 저장 및 다음 단계로", use_container_width=True)
 
         if submit_button_edit:
-            with st.spinner("💾 저장 중..."):
+            with st.spinner("수정사항 저장 중..."):
                 st.session_state.data["teaching_methods_text"] = teaching_methods_text
                 st.session_state.data["assessment_plan"] = new_plan
                 del st.session_state.generated_step_5
-                st.success("✅ 교수학습 및 평가가 수정되었습니다!")
+                st.success("교수학습 및 평가 수정 완료.")
                 st.session_state.step = 6
                 st.rerun()
 
@@ -1283,9 +986,9 @@ def show_step_5():
 
 
 def generate_lesson_plans_all_at_once(total_hours, data):
-    school_type = data.get('school_type', '초등학교')
-    target_level = "초등학교 3, 4학년" if school_type == "초등학교" else "중학교"
-    
+    all_lesson_plans = []
+    progress_bar = st.progress(0)
+
     necessity = data.get('necessity', '')
     overview = data.get('overview', '')
     domain = data.get('domain', '')
@@ -1299,10 +1002,7 @@ def generate_lesson_plans_all_at_once(total_hours, data):
 아래 정보를 참고하여 **1차시부터 {total_hours}차시까지** 한 번에 모두 연결된 지도계획을 JSON으로 작성해주세요.
 
 [이전 단계 결과]
-학교급: {school_type}
-대상 학년: {', '.join(data.get('grades', []))}
-{target_level} 수준에 맞게 작성해주세요.
-
+대상 학년 {', '.join(data.get('grades', []))}에 맞는 수준으로 작성해야 한다.
 - 영역명: {domain}
 - 핵심 아이디어: {key_ideas}
 - 내용체계: {content_elements}
@@ -1318,7 +1018,7 @@ def generate_lesson_plans_all_at_once(total_hours, data):
 3. 구체적이고 학생활동 중심으로 진술하세요. ~~하기 형식으로 해주세요.
 4. 실제 수업에 필요한 교수학습자료 명시
 5. 이전 차시와의 연계성 고려
-6. {target_level} 수준에 맞는 내용으로 작성하여 주세요.
+6. 초등학교 3학년 4학년 수준에 맞는 내용으로 작성하여 주세요.
 
 (예시)
 학습주제: 질문에도 양심이 있다.
@@ -1364,42 +1064,41 @@ def generate_lesson_plans_all_at_once(total_hours, data):
 
 def show_step_6():
     total_hours = st.session_state.data.get('total_hours', 30)
-    st.markdown(f"<div class='step-header'><h3>📅 6단계: 차시별 지도계획 (총 {total_hours}차시)</h3></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='step-header'><h3>6단계: 차시별 지도계획 (총 {total_hours}차시)</h3></div>", unsafe_allow_html=True)
 
     if 'generated_step_6' not in st.session_state:
         with st.form("lesson_plans_form"):
-            st.info(f"📚 총 {total_hours}차시를 한 번에 생성합니다.")
-            sb = st.form_submit_button("🚀 전체 차시 생성", use_container_width=True)
+            st.info(f"총 {total_hours}차시를 한 번에 생성합니다.")
+            sb = st.form_submit_button("전체 차시 생성", use_container_width=True)
         if sb:
-            with st.spinner(f"✨ AI가 {total_hours}차시 계획을 수립 중입니다..."):
+            with st.spinner("생성 중..."):
                 lesson_plans = generate_lesson_plans_all_at_once(total_hours, st.session_state.data)
                 if lesson_plans:
                     st.session_state.data["lesson_plans"] = lesson_plans
-                    st.success(f"✅ {total_hours}차시 계획이 완료되었습니다!")
+                    st.success(f"{total_hours}차시 계획 생성 완료.")
                     st.session_state.generated_step_6 = True
-                    st.rerun()
     else:
         with st.form("edit_lesson_plans_form"):
-            st.markdown("#### ✏️ 생성된 차시별 계획 수정")
+            st.markdown("#### 생성된 차시별 계획 수정")
             lesson_plans = st.session_state.data.get('lesson_plans', [])
             edited_plans = []
             total_tabs = (total_hours + 9) // 10
-            tabs = st.tabs([f"📅 {i*10+1}~{min((i+1)*10, total_hours)}차시" for i in range(total_tabs)])
+            tabs = st.tabs([f"{i*10+1}~{min((i+1)*10, total_hours)}차시" for i in range(total_tabs)])
             for tab_idx, tab in enumerate(tabs):
                 with tab:
                     start_idx = tab_idx * 10
                     end_idx = min(start_idx + 10, total_hours)
                     for i in range(start_idx, end_idx):
                         if i < len(lesson_plans):
-                            st.markdown(f"##### 📖 {i+1}차시")
+                            st.markdown(f"##### {i+1}차시")
                             col1, col2 = st.columns([1, 2])
                             with col1:
-                                topic = st.text_input("💡 학습주제", value=lesson_plans[i].get('topic', ''),
+                                topic = st.text_input("학습주제", value=lesson_plans[i].get('topic', ''),
                                                       key=f"topic_{i}")
-                                materials = st.text_input("📚 교수학습자료", value=lesson_plans[i].get('materials', ''),
+                                materials = st.text_input("교수학습자료", value=lesson_plans[i].get('materials', ''),
                                                           key=f"materials_{i}")
                             with col2:
-                                content = st.text_area("📝 학습내용", value=lesson_plans[i].get('content', ''),
+                                content = st.text_area("학습내용", value=lesson_plans[i].get('content', ''),
                                                        key=f"content_{i}", height=100)
                             edited_plans.append({
                                 "lesson_number": f"{i+1}",
@@ -1408,83 +1107,83 @@ def show_step_6():
                                 "materials": materials
                             })
                             st.markdown("---")
-            submit_button_edit = st.form_submit_button("💾 수정사항 저장 및 다음 단계로", use_container_width=True)
+            submit_button_edit = st.form_submit_button("수정사항 저장 및 다음 단계로", use_container_width=True)
         if submit_button_edit:
-            with st.spinner("💾 저장 중..."):
+            with st.spinner("저장 중..."):
                 st.session_state.data['lesson_plans'] = edited_plans
                 del st.session_state.generated_step_6
-                st.success("✅ 차시별 계획이 수정되었습니다!")
+                st.success("차시별 계획 수정 완료.")
                 st.session_state.step = 7
                 st.rerun()
     return False
 
 
 def show_final_review():
-    st.markdown("<div class='step-header'><h3>✅ 최종 계획서 검토</h3></div>", unsafe_allow_html=True)
+    st.title("최종 계획서 검토")
     try:
         data = st.session_state.data
-        tabs = st.tabs(["📋 기본정보", "📚 내용체계", "🎯 성취기준", "📝 교수학습 및 평가", "📅 차시별계획"])
+        tabs = st.tabs(["기본정보", "내용체계", "성취기준", "교수학습 및 평가", "차시별계획"])
 
         with tabs[0]:
-            st.markdown("### 📋 기본 정보")
+            st.markdown("### 기본 정보")
             basic_info = {
-                "🏫 학교급": data.get('school_type', ''),
-                "📚 대상 학년": ', '.join(data.get('grades', [])),
-                "⏱️ 총 차시": f"{data.get('total_hours','')}차시",
-                "📅 운영 학기": ', '.join(data.get('semester', [])),
-                "📖 연계 교과": ', '.join(data.get('subjects', [])),
-                "✨ 활동명": data.get('activity_name',''),
-                "📝 요구사항": data.get('requirements',''),
-                "📌 필요성": data.get('necessity',''),
-                "📊 개요": data.get('overview','')
+                "학교급": data.get('school_type', ''),
+                "대상 학년": ', '.join(data.get('grades', [])),
+                "총 차시": f"{data.get('total_hours','')}차시",
+                "운영 학기": ', '.join(data.get('semester', [])),
+                "연계 교과": ', '.join(data.get('subjects', [])),
+                "활동명": data.get('activity_name',''),
+                "요구사항": data.get('requirements',''),
+                "필요성": data.get('necessity',''),
+                "개요": data.get('overview','')
             }
             for k,v in basic_info.items():
                 st.markdown(f"**{k}**: {v}")
 
-            st.button("✏️ 기본정보 수정하기", key="edit_basic_info",
+            st.button("기본정보 수정하기", key="edit_basic_info",
                       on_click=lambda: set_step(1),
                       use_container_width=True)
 
         with tabs[1]:
-            st.markdown("### 📚 내용체계 (4세트)")
+            st.markdown("### 내용체계 (4세트)")
             content_sets = data.get("content_sets", [])
             if not content_sets:
                 st.warning("현재 저장된 내용체계가 없습니다.")
             else:
                 for i, cset in enumerate(content_sets, start=1):
-                    st.markdown(f"#### 📖 내용체계 세트 {i}")
+                    st.markdown(f"#### ▶ 내용체계 세트 {i}")
                     domain = cset.get("domain", "")
                     key_ideas = cset.get("key_ideas", [])
                     content_elements = cset.get("content_elements", {})
 
-                    st.write(f"**🏷️ 영역명**: {domain}")
-                    st.write("**💡 핵심 아이디어**:")
+                    st.write(f"**영역명**: {domain}")
+                    st.write("**핵심 아이디어**:")
                     if key_ideas:
                         for idea in key_ideas:
                             st.write(f"- {idea}")
                     else:
                         st.write("- (없음)")
 
-                    st.write("**📋 내용 요소**:")
+                    st.write("**내용 요소**:")
                     kua = content_elements.get("knowledge_and_understanding", [])
                     pns = content_elements.get("process_and_skills", [])
                     vat = content_elements.get("values_and_attitudes", [])
 
-                    st.markdown("📚 **지식·이해**")
+                    st.markdown("- 지식·이해")
                     if kua:
                         for item in kua:
                             st.write(f"  - {item}")
                     else:
                         st.write("  - (없음)")
 
-                    st.markdown("⚙️ **과정·기능**")
+                    st.markdown("- 과정·기능")
                     if pns:
                         for item in pns:
                             st.write(f"  - {item}")
                     else:
                         st.write("  - (없음)")
 
-                    st.markdown("💝 **가치·태도**")
+                    st.markdown("- 가치·태도")
                     if vat:
                         for item in vat:
                             st.write(f"  - {item}")
@@ -1493,41 +1192,40 @@ def show_final_review():
 
                     st.divider()
 
-            st.button("✏️ 내용체계 수정하기",
+            st.button("내용체계 수정하기",
                       key="edit_content_sets",
                       on_click=lambda: set_step(3),
                       use_container_width=True)
 
         with tabs[2]:
-            st.markdown("### 🎯 성취기준")
+            st.markdown("### 성취기준")
             for std in data.get("standards", []):
-                st.markdown(f"**📌 {std['code']}**: {std['description']}")
-                st.markdown("##### 📊 수준별 성취기준")
+                st.markdown(f"**{std['code']}**: {std['description']}")
+                st.markdown("##### 수준별 성취기준")
                 for lv in std['levels']:
-                    label_map = {"A":"⭐ 상", "B":"✨ 중", "C":"🌟 하"}
+                    label_map = {"A":"상", "B":"중", "C":"하"}
                     label = label_map.get(lv["level"], lv["level"])
-                    st.write(f"- {label}: {lv['description']}")
+                    st.write(f"- {label} 수준: {lv['description']}")
                 st.markdown("---")
 
-            st.button("✏️ 성취기준 수정하기",
+            st.button("성취기준 수정하기",
                       key="edit_standards",
                       on_click=lambda: set_step(4),
                       use_container_width=True)
 
         with tabs[3]:
-            st.markdown("### 📝 교수학습 및 평가")
+            st.markdown("### 교수학습 및 평가")
             methods_text = data.get("teaching_methods_text","")
 
-            st.markdown("#### 🎓 교수학습방법")
+            st.markdown("#### 교수학습방법")
             if methods_text.strip():
                 lines = methods_text.split('\n')
                 for line in lines:
-                    if line.strip():
-                        st.write(f"- {line.strip()}")
+                    st.write(f"- {line.strip()}")
             else:
                 st.write("(교수학습방법 없음)")
 
-            st.markdown("#### 📊 평가계획")
+            st.markdown("#### 평가계획")
             for ap in data.get("assessment_plan", []):
                 code = ap.get("code","")
                 desc = ap.get("description","")
@@ -1537,30 +1235,30 @@ def show_final_review():
                 mi = ap.get("criteria_mid","")
                 lo = ap.get("criteria_low","")
 
-                st.markdown(f"**📌 {code}** - {desc}")
+                st.markdown(f"**{code}** - {desc}")
                 st.write(f"- 평가요소: {elem}")
                 st.write(f"- 수업평가방법: {meth}")
-                st.write(f"- ⭐ 상 수준: {hi}")
-                st.write(f"- ✨ 중 수준: {mi}")
-                st.write(f"- 🌟 하 수준: {lo}")
+                st.write(f"- 상 수준 기준: {hi}")
+                st.write(f"- 중 수준 기준: {mi}")
+                st.write(f"- 하 수준 기준: {lo}")
                 st.markdown("---")
 
-            st.button("✏️ 교수학습 및 평가 수정하기",
+            st.button("교수학습 및 평가 수정하기",
                       key="edit_teaching_assessment",
                       on_click=lambda: set_step(5),
                       use_container_width=True)
 
         with tabs[4]:
-            st.markdown("### 📅 차시별 계획")
+            st.markdown("### 차시별 계획")
             lesson_plans_df = pd.DataFrame(data.get('lesson_plans', []))
             if not lesson_plans_df.empty:
                 st.dataframe(
                     lesson_plans_df,
                     column_config={
-                        "lesson_number": "📖 차시",
-                        "topic": "💡 학습주제",
-                        "content": "📝 학습내용",
-                        "materials": "📚 교수학습자료"
+                        "lesson_number": "차시",
+                        "topic": "학습주제",
+                        "content": "학습내용",
+                        "materials": "교수학습자료"
                     },
                     hide_index=True,
                     height=400
@@ -1568,21 +1266,20 @@ def show_final_review():
             else:
                 st.warning("차시별 계획이 없습니다.")
 
-            st.button("✏️ 차시별 계획 수정하기",
+            st.button("차시별 계획 수정하기",
                       key="edit_lesson_plans",
                       on_click=lambda: set_step(6),
                       use_container_width=True)
 
         # 다운로드 및 처음으로 돌아가기 버튼
-        st.markdown("---")
         col1, col2, col3 = st.columns(3)
         with col1:
-            if st.button("🔄 모든 단계 수정하기", use_container_width=True):
+            if st.button("모든 단계 수정하기", use_container_width=True):
                 st.session_state.step = 1
                 st.rerun()
 
         with col2:
-            st.markdown("#### 📥 원하는 항목만 선택하여 Excel 다운로드")
+            st.markdown("#### 원하는 항목만 선택하여 Excel 다운로드")
             available_sheets = ["기본정보", "내용체계", "성취기준", "교수학습 및 평가", "차시별계획"]
             selected_sheets = st.multiselect(
                 "다운로드할 항목",
@@ -1599,15 +1296,15 @@ def show_final_review():
                     use_container_width=True
                 )
             else:
-                st.warning("⚠️ 최소 한 개 이상의 항목을 선택해주세요.")
+                st.warning("최소 한 개 이상의 항목을 선택해주세요.")
 
         with col3:
-            if st.button("🆕 새로 만들기", use_container_width=True):
+            if st.button("새로 만들기", use_container_width=True):
                 st.session_state.clear()
                 st.rerun()
 
     except Exception as e:
-        st.error(f"⚠️ 최종 검토 처리 중 오류: {str(e)}")
+        st.error(f"최종 검토 처리 중 오류: {str(e)}")
 
 
 def create_excel_document(selected_sheets):
@@ -1616,8 +1313,7 @@ def create_excel_document(selected_sheets):
         workbook = writer.book
         header_format = workbook.add_format({
             'bold': True,
-            'bg_color': '#667eea',
-            'font_color': 'white',
+            'bg_color': '#E2E8F0',
             'border': 1,
             'text_wrap': True,
             'align': 'center',
@@ -1782,24 +1478,13 @@ def set_step(step_number):
 
 
 def show_chatbot():
-    st.sidebar.markdown("## 🤖 학교자율시간 AI 도우미")
+    st.sidebar.markdown("## 학교자율시간 교육과정 설계 챗봇")
 
-    st.sidebar.markdown("**💬 추천 질문:**")
-    
-    # 학교급에 따른 추천 질문 변경
-    school_type = st.session_state.data.get('school_type', '초등학교')
-    
-    if school_type == "초등학교":
-        recommended_questions = [
-            "초등학교 3학년 학교자율시간의 활동명 10가지만 제시하여 주세요.",
-            "초등학교 6학년 세계요리탐험에 알맞은 수업지도 계획을 작성해주세요.",
-        ]
-    else:  # 중학교
-        recommended_questions = [
-            "중학교 1학년 학교자율시간의 활동명 10가지만 제시하여 주세요.",
-            "중학교 2학년 AI와 미래사회 프로젝트 수업 계획을 작성해주세요.",
-        ]
-    
+    st.sidebar.markdown("**추천 질문:**")
+    recommended_questions = [
+        "초등학교 3학년 학교자율시간의 활동명 10가지만 제시하여 주세요.",
+        "초등학교 6학년 세계요리탐험에 알맞은 수업지도 계획을 작성해주세요.",
+    ]
     with st.sidebar.container():
         st.markdown('<div class="sidebar-questions">', unsafe_allow_html=True)
         for q in recommended_questions:
@@ -1809,12 +1494,12 @@ def show_chatbot():
 
     if "chat_input" not in st.session_state:
         st.session_state.chat_input = ""
-    user_input = st.sidebar.text_input("💬 질문을 입력하세요:", value=st.session_state.chat_input, key="chat_input")
+    user_input = st.sidebar.text_input("질문을 입력하세요:", value=st.session_state.chat_input, key="chat_input")
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
-    if st.sidebar.button("📤 질문 전송", key="send_question"):
+    if st.sidebar.button("질문 전송", key="send_question"):
         if user_input:
             # 문서 검색 없이 바로 응답 생성
             prompt = f"""당신은 귀여운 친구 캐릭터 두 명, '🐰 토끼'와 '🐻 곰돌이'입니다.
@@ -1839,10 +1524,10 @@ def show_chatbot():
             sidebar_typewriter_effect("🤖 " + answer, delay=0.001)
             st.session_state.chat_history.append((user_input, answer))
         else:
-            st.sidebar.warning("⚠️ 질문을 입력해주세요.")
+            st.sidebar.warning("질문을 입력해주세요.")
 
     if st.session_state.chat_history:
-        st.sidebar.markdown("### 📜 대화 내역")
+        st.sidebar.markdown("### 대화 내역")
         for idx, (q, a) in enumerate(st.session_state.chat_history):
             st.sidebar.markdown(f"**Q{idx+1}:** {q}")
             st.sidebar.markdown(f"**🤖 A{idx+1}:** {a}")
@@ -1855,9 +1540,7 @@ def main():
             st.session_state.data = {}
         if 'step' not in st.session_state:
             st.session_state.step = 1
-        
-        # 타이틀을 중앙에 배치
-        st.markdown("<h1 style='text-align: center;'>🎓 학교자율시간 올인원 플랫폼</h1>", unsafe_allow_html=True)
+        st.title("학교자율시간 올인원")
 
         left_col = st.container()
         with left_col:
@@ -1876,14 +1559,14 @@ def main():
             if step_function:
                 step_function()
             else:
-                st.error("⚠️ 잘못된 단계입니다.")
+                st.error("잘못된 단계입니다.")
 
-        # 사이드바 챗봇
+        # 사이드바 챗봇 (임베딩 없이 작동)
         show_chatbot()
 
     except Exception as e:
-        st.error(f"⚠️ 애플리케이션 실행 중 오류: {e}")
-        if st.button("🔄 처음부터 다시 시작"):
+        st.error(f"애플리케이션 실행 중 오류: {e}")
+        if st.button("처음부터 다시 시작"):
             st.session_state.clear()
             st.rerun()
 
@@ -1891,20 +1574,17 @@ def main():
 if __name__ == "__main__":
     main()
 
-# 푸터
 st.markdown(
     """
-    <div class="footer" style="text-align:center; margin-top:40px; padding: 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); border-radius: 15px;">
+    <div class="footer" style="text-align:center; margin-top:20px;">
         <img src="https://huggingface.co/spaces/powerwarez/gailabicon/resolve/main/gailab06.png"
              alt="icon"
-             style="width:80px; height:auto; margin-bottom: 10px;">
-        <p style="font-weight: 600; color: #4a5568;">제작: 경상북도교육청 인공지능연구소(GAI LAB) 교사 서혁수</p>
-        <p style="color: #718096; font-size: 0.9rem;">© 2024 GAI LAB. All rights reserved.</p>
+             style="width:80px; height:auto;">
+        <p>제작: 경상북도교육청 인공지능연구소(GAI LAB) 교사 서혁수</p>
     </div>
     """,
     unsafe_allow_html=True
 )
-
 
 
 
