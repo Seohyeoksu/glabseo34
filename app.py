@@ -500,7 +500,7 @@ JSON 예시:
 def show_step_1():
     st.markdown("<div class='step-header'><h3>1단계: 기본 정보</h3></div>", unsafe_allow_html=True)
 
-    # school_type, grades, subjects 기본값 설정
+    # 기본값 설정
     if "school_type" not in st.session_state.data:
         st.session_state.data["school_type"] = "초등학교"
     if "grades" not in st.session_state.data:
@@ -508,24 +508,22 @@ def show_step_1():
     if "subjects" not in st.session_state.data:
         st.session_state.data["subjects"] = []
 
-    current_school_type = st.session_state.data.get('school_type', '초등학교')
-
-    if st.button("학교급 바꾸기", use_container_width=True):
-        if current_school_type == "초등학교":
-            st.session_state.data["school_type"] = "중학교"
-        else:
-            st.session_state.data["school_type"] = "초등학교"
-
-        st.session_state.data["grades"] = []
-        st.session_state.data["subjects"] = []
-        st.session_state.step = 1
-        st.rerun()
-
     if 'generated_step_1' not in st.session_state:
         with st.form("basic_info_form"):
-            options = ["초등학교", "중학교"]
-            index = 0 if st.session_state.data["school_type"] == "초등학교" else 1
-            school_type = st.radio("학교급", options, index=index)
+            # 학교급 선택 - 라디오 버튼으로 변경
+            school_type = st.radio(
+                "학교급",
+                ["초등학교", "중학교"],
+                index=0 if st.session_state.data.get("school_type") == "초등학교" else 1,
+                horizontal=True,
+                key="school_type_radio"
+            )
+            
+            # 학교급 변경 시 학년과 과목 자동 리셋
+            if school_type != st.session_state.data.get("school_type"):
+                st.session_state.data["school_type"] = school_type
+                st.session_state.data["grades"] = []
+                st.session_state.data["subjects"] = []
 
             total_hours = st.number_input(
                 "총 차시",
@@ -541,27 +539,34 @@ def show_step_1():
             )
 
             st.markdown("#### 학년 선택")
+            
+            # 학교급에 따라 다른 학년과 과목 옵션 제공
             if school_type == "초등학교":
                 grades = st.multiselect(
                     "학년",
                     ["3학년", "4학년", "5학년", "6학년"],
-                    default=st.session_state.data.get('grades', [])
+                    default=st.session_state.data.get('grades', []),
+                    key="elem_grades"
                 )
                 subjects = st.multiselect(
                     "교과",
                     ["국어", "수학", "사회", "과학", "영어", "음악", "미술", "체육", "실과", "도덕"],
-                    default=st.session_state.data.get('subjects', [])
+                    default=st.session_state.data.get('subjects', []),
+                    key="elem_subjects"
                 )
-            else:
+            else:  # 중학교
                 grades = st.multiselect(
                     "학년",
                     ["1학년", "2학년", "3학년"],
-                    default=st.session_state.data.get('grades', [])
+                    default=st.session_state.data.get('grades', []),
+                    key="mid_grades"
                 )
                 subjects = st.multiselect(
                     "교과",
-                    ["국어", "수학", "사회/역사", "과학/기술", "영어", "음악", "미술", "체육", "정보", "도덕","보건","진로와 직업","한문","환경과 녹생성장"],
-                    default=st.session_state.data.get('subjects', [])
+                    ["국어", "수학", "사회/역사", "과학/기술", "영어", "음악", "미술", "체육", 
+                     "정보", "도덕", "보건", "진로와 직업", "한문", "환경과 녹색성장"],
+                    default=st.session_state.data.get('subjects', []),
+                    key="mid_subjects"
                 )
 
             activity_name = st.text_input(
@@ -599,6 +604,30 @@ def show_step_1():
                 st.error("모든 필수 항목을 입력해주세요.")
 
     if 'generated_step_1' in st.session_state:
+        # 학교급 변경 버튼 추가
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            if st.button("🔄 학교급 변경", use_container_width=True):
+                # 현재 학교급 변경
+                current = st.session_state.data.get('school_type', '초등학교')
+                new_school_type = "중학교" if current == "초등학교" else "초등학교"
+                
+                # 데이터 초기화
+                st.session_state.data["school_type"] = new_school_type
+                st.session_state.data["grades"] = []
+                st.session_state.data["subjects"] = []
+                
+                # 생성된 정보 삭제
+                if 'generated_step_1' in st.session_state:
+                    del st.session_state.generated_step_1
+                
+                # 1단계로 리셋
+                st.session_state.step = 1
+                st.rerun()
+        
+        with col2:
+            st.info(f"현재 선택된 학교급: {st.session_state.data.get('school_type', '초등학교')}")
+        
         with st.form("edit_basic_info_form"):
             st.markdown("#### 생성된 내용 수정")
             necessity = st.text_area(
@@ -1556,4 +1585,5 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
