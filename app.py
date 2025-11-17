@@ -578,7 +578,7 @@ def show_step_1():
             requirements = st.text_area(
                 "요구사항",
                 value=st.session_state.data.get('requirements', ''),
-                placeholder="예) 디지털 리터러시 강화 필요\n예) 학생들의 주도적 학습활동 및 안전교육 병행 등등...\n",
+                placeholder="예) 디지털 리터러시 강화 필요\n예) 학생들의 주도적 학습활동 및 안전교육 병행\n등등...",
                 help="필요한 요구사항이나 핵심 요구 내용을 적어주세요.",
                 height=100
             )
@@ -605,30 +605,6 @@ def show_step_1():
                 st.error("모든 필수 항목을 입력해주세요.")
 
     if 'generated_step_1' in st.session_state:
-        # 학교급 변경 버튼 추가
-        col1, col2 = st.columns([1, 3])
-        with col1:
-            if st.button("🔄 학교급 변경", use_container_width=True):
-                # 현재 학교급 변경
-                current = st.session_state.data.get('school_type', '초등학교')
-                new_school_type = "중학교" if current == "초등학교" else "초등학교"
-                
-                # 데이터 초기화
-                st.session_state.data["school_type"] = new_school_type
-                st.session_state.data["grades"] = []
-                st.session_state.data["subjects"] = []
-                
-                # 생성된 정보 삭제
-                if 'generated_step_1' in st.session_state:
-                    del st.session_state.generated_step_1
-                
-                # 1단계로 리셋
-                st.session_state.step = 1
-                st.rerun()
-        
-        with col2:
-            st.info(f"현재 선택된 학교급: {st.session_state.data.get('school_type', '초등학교')}")
-        
         with st.form("edit_basic_info_form"):
             st.markdown("#### 생성된 내용 수정")
             necessity = st.text_area(
@@ -1586,6 +1562,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 
 
